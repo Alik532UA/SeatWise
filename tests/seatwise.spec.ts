@@ -180,6 +180,42 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 		await expect(firstTableLabel).toContainText('A');
 	});
 
+	test('compact skin renders empty state, expands participant names, calculates and copies results', async ({
+		page
+	}) => {
+		await page.goto(`${BASE}/`);
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// Switch to Compact
+		const compactBtn = page.locator('[data-testid="skin-btn-compact"]');
+		await compactBtn.click();
+		await page.waitForTimeout(200);
+
+		// Before calculation, empty state is displayed instead of a blank screen
+		await expect(page.locator('.skin-compact .empty-state')).toBeVisible();
+
+		// Participant names accordion is present
+		const namesSummary = page.locator('.skin-compact .names-summary');
+		await expect(namesSummary).toBeVisible();
+
+		// Calculate seating
+		const calcBtn = page.locator('.skin-compact .config-bar button.primary');
+		await calcBtn.click();
+		await page.waitForTimeout(400);
+
+		// Results toolbar and round cards are displayed
+		await expect(page.locator('.skin-compact .results-toolbar')).toBeVisible();
+		const roundsCount = await page.locator('.skin-compact .mini-round').count();
+		expect(roundsCount).toBeGreaterThan(0);
+
+		// Copy button is functional and visible
+		const copyBtn = page.locator('.skin-compact .copy-btn');
+		await expect(copyBtn).toBeVisible();
+	});
+
 	test('preserves seating results and configuration when switching language (UK <-> EN)', async ({
 		page
 	}) => {

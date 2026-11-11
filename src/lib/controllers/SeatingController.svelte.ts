@@ -122,10 +122,11 @@ export class SeatingController {
 	 * Отримує мітку гостя за замовчуванням (коли ім'я не задано).
 	 */
 	getParticipantDefaultName(id: number): string {
+		if (typeof id !== 'number' || isNaN(id)) return '';
 		if (this.participantNaming === 'letters') {
 			return indexToLetter(id - 1);
 		}
-		return id.toString();
+		return String(id);
 	}
 
 	/**
