@@ -179,4 +179,45 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 		await lettersBtn.click();
 		await expect(firstTableLabel).toContainText('A');
 	});
+
+	test('preserves seating results and configuration when switching language (UK <-> EN)', async ({
+		page
+	}) => {
+		await page.goto(`${BASE}/`);
+
+		// Dismiss wizard if open
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// Calculate seating
+		await page.locator('.btn-primary').click();
+		await page.waitForTimeout(200);
+
+		// Verify results are visible
+		await expect(page.locator('.results-header')).toBeVisible();
+		const initialRoundsCount = await page.locator('.round-card').count();
+		expect(initialRoundsCount).toBeGreaterThan(0);
+
+		// Switch language to EN
+		const enBtn = page.locator('[data-testid="lang-btn-en"]');
+		await enBtn.click();
+		await page.waitForTimeout(500);
+
+		// Results MUST still be visible!
+		await expect(page.locator('.results-header')).toBeVisible();
+		const enRoundsCount = await page.locator('.round-card').count();
+		expect(enRoundsCount).toBe(initialRoundsCount);
+
+		// Switch language back to UK
+		const ukBtn = page.locator('[data-testid="lang-btn-uk"]');
+		await ukBtn.click();
+		await page.waitForTimeout(500);
+
+		// Results MUST still be visible!
+		await expect(page.locator('.results-header')).toBeVisible();
+		const ukRoundsCount = await page.locator('.round-card').count();
+		expect(ukRoundsCount).toBe(initialRoundsCount);
+	});
 });

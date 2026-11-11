@@ -19,6 +19,10 @@
 	$effect(() => {
 		theme.sync();
 	});
+
+	$effect(() => {
+		seating.saveState();
+	});
 </script>
 
 <div class="app-layout" data-theme={theme.theme}>

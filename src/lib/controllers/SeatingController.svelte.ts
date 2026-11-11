@@ -50,6 +50,52 @@ export class SeatingController {
 		if (savedParticipant === 'letters' || savedParticipant === 'numbers') {
 			this.participantNaming = savedParticipant;
 		}
+
+		const savedTotal = storage.get('total_people');
+		if (savedTotal && !isNaN(Number(savedTotal))) {
+			const parsed = Number(savedTotal);
+			if (parsed > 0) this.totalPeople = parsed;
+		}
+
+		const savedCount = storage.get('table_count');
+		if (savedCount && !isNaN(Number(savedCount))) {
+			const parsed = Number(savedCount);
+			if (parsed > 0) this.tableCount = parsed;
+		}
+
+		const savedCapacity = storage.get('table_capacity');
+		if (savedCapacity && !isNaN(Number(savedCapacity))) {
+			const parsed = Number(savedCapacity);
+			if (parsed > 0) this.tableCapacity = parsed;
+		}
+
+		const savedNames = storage.get('names_input');
+		if (savedNames !== null) {
+			this.namesInput = savedNames;
+		}
+
+		const savedRounds = storage.get('rounds');
+		if (savedRounds) {
+			try {
+				const parsed = JSON.parse(savedRounds);
+				if (Array.isArray(parsed)) {
+					this.rounds = parsed;
+				}
+			} catch (e) {
+				console.error('Failed to parse saved rounds:', e);
+			}
+		}
+	}
+
+	/**
+	 * Зберігає стан параметрів та результатів розсадки у сховище.
+	 */
+	saveState() {
+		storage.set('total_people', String(this.totalPeople));
+		storage.set('table_count', String(this.tableCount));
+		storage.set('table_capacity', String(this.tableCapacity));
+		storage.set('names_input', this.namesInput);
+		storage.set('rounds', JSON.stringify(this.rounds));
 	}
 
 	setTableNaming(mode: NamingMode) {
@@ -241,6 +287,7 @@ export class SeatingController {
 				);
 			}
 			this.isCalculating = false;
+			this.saveState();
 		}, 50);
 	}
 
@@ -255,5 +302,11 @@ export class SeatingController {
 		this.rounds = [];
 		this.errorMessage = '';
 		this.isCalculating = false;
+
+		storage.remove('total_people');
+		storage.remove('table_count');
+		storage.remove('table_capacity');
+		storage.remove('names_input');
+		storage.remove('rounds');
 	}
 }

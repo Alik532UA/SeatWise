@@ -2,14 +2,19 @@
 	import { getContext } from 'svelte';
 	import type { ThemeController } from '$lib/controllers/ThemeController.svelte';
 	import type { UIController } from '$lib/controllers/UIController.svelte';
+	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { setLocale, getLocale, locales } from '$lib/paraglide/runtime';
 	import { Sparkle, ArrowSquareOut, Sun, Moon, Compass } from 'phosphor-svelte';
 
 	const theme = getContext<ThemeController>('theme');
 	const ui = getContext<UIController>('ui');
+	const seating = getContext<SeatingController>('seating');
 
 	const handleLocaleChange = (newLocale: string) => {
+		if (seating) {
+			seating.saveState();
+		}
 		setLocale(newLocale as any);
 	};
 </script>
@@ -109,6 +114,7 @@
 					class:active={getLocale() === l}
 					onclick={() => handleLocaleChange(l)}
 					aria-pressed={getLocale() === l}
+					data-testid="lang-btn-{l}"
 				>
 					{l.toUpperCase()}
 				</button>

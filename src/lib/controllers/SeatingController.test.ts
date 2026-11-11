@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { SeatingController, indexToLetter } from './SeatingController.svelte';
+import { storage } from '$lib/services/storage';
 
 describe('SeatingController (Runes State & Seating Logic)', () => {
 	it('initializes with default values including letter tables and number guests', () => {
@@ -113,5 +114,66 @@ describe('SeatingController (Runes State & Seating Logic)', () => {
 		expect(controller.tableCapacity).toBe(6);
 		expect(controller.namesInput).toBe('');
 		expect(controller.rounds).toEqual([]);
+	});
+
+	it('persists state and restores it on new instance (survives locale change/page reload)', () => {
+		const mockStore: Record<string, string> = {};
+		vi.spyOn(storage, 'get').mockImplementation((key: string) => mockStore[key] ?? null);
+		vi.spyOn(storage, 'set').mockImplementation((key: string, val: string) => {
+			mockStore[key] = val;
+		});
+		vi.spyOn(storage, 'remove').mockImplementation((key: string) => {
+			delete mockStore[key];
+		});
+
+		const controller = new SeatingController();
+		controller.totalPeople = 45;
+		controller.tableCount = 9;
+		controller.tableCapacity = 5;
+		controller.namesInput = 'Person 1\nPerson 2';
+		controller.rounds = [
+			[
+				[1, 2],
+				[3, 4]
+			]
+		];
+
+		controller.saveState();
+
+		expect(mockStore['total_people']).toBe('45');
+		expect(mockStore['table_count']).toBe('9');
+		expect(mockStore['table_capacity']).toBe('5');
+		expect(mockStore['names_input']).toBe('Person 1\nPerson 2');
+		expect(mockStore['rounds']).toBe(
+			JSON.stringify([
+				[
+					[1, 2],
+					[3, 4]
+				]
+			])
+		);
+
+		// Симулюємо створення нового екземпляра після перемикання мови / релоаду
+		const restoredController = new SeatingController();
+		expect(restoredController.totalPeople).toBe(45);
+		expect(restoredController.tableCount).toBe(9);
+		expect(restoredController.tableCapacity).toBe(5);
+		expect(restoredController.namesInput).toBe('Person 1\nPerson 2');
+		expect(restoredController.rounds).toEqual([
+			[
+				[1, 2],
+				[3, 4]
+			]
+		]);
+
+		// Перевірка очищення при reset
+		restoredController.reset();
+		expect(mockStore['rounds']).toBeUndefined();
+		expect(mockStore['total_people']).toBeUndefined();
+		expect(mockStore['table_count']).toBeUndefined();
+		expect(mockStore['table_capacity']).toBeUndefined();
+		expect(mockStore['names_input']).toBeUndefined();
+
+		vi.restoreAllMocks();
 	});
 });
