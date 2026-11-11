@@ -173,6 +173,11 @@
 							<strong>{Math.ceil(Math.sqrt(seating.totalPeople))}</strong> або
 							<strong>{Math.max(4, Math.round(seating.totalPeople / 5))}</strong> столів.
 						</p>
+						<p style="margin-top: 0.4rem; font-size: 0.8rem; opacity: 0.85;">
+							Столи позначаються літерами ({seating.getTableLabel(0)}, {seating.getTableLabel(1)}, {seating.getTableLabel(
+								2
+							)}...), щоб не плутати їх із гостями.
+						</p>
 					</div>
 				</div>
 			{:else if step === 3}

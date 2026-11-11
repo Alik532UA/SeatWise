@@ -3,6 +3,7 @@
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import NumberStepper from '$lib/components/ui/NumberStepper.svelte';
+	import NamingControls from '$lib/components/ui/NamingControls.svelte';
 	import {
 		Users,
 		Armchair,
@@ -74,6 +75,10 @@
 		</div>
 	</div>
 
+	<div style="max-width: 800px; margin: 0 auto; width: 100%;">
+		<NamingControls />
+	</div>
+
 	<section class="names-panel-visual">
 		<label for="namesInput">{m.participants_list()}:</label>
 		<textarea
@@ -129,7 +134,7 @@
 								>
 									<div class="visual-table">
 										<div class="table-surface">
-											<span class="table-number">#{tIndex + 1}</span>
+											<span class="table-number">#{seating.getTableLabel(tIndex)}</span>
 											<span class="table-text">{m.table()}</span>
 										</div>
 

@@ -4,6 +4,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import { Sparkle, ArrowsCounterClockwise, Copy, Check, Target } from 'phosphor-svelte';
 	import NumberStepper from '$lib/components/ui/NumberStepper.svelte';
+	import NamingControls from '$lib/components/ui/NamingControls.svelte';
 
 	const seating = getContext<SeatingController>('seating');
 </script>
@@ -59,6 +60,8 @@
 		</div>
 	</section>
 
+	<NamingControls />
+
 	<section class="names-panel">
 		<label for="namesInput">{m.participants_list()}:</label>
 		<textarea
@@ -105,7 +108,7 @@
 						{#each round as table, tIndex}
 							{#if table.length > 0}
 								<div class="table-row">
-									<span class="table-label">{m.table()} {tIndex + 1}</span>
+									<span class="table-label">{m.table()} {seating.getTableLabel(tIndex)}</span>
 									<div class="participants-grid">
 										{#each table as person}
 											<div class="person-avatar" title={seating.getParticipantName(person)}>

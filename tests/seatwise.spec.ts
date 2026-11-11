@@ -151,4 +151,32 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 		await minusBtn.click();
 		expect(parseInt(await totalPeopleInput.inputValue(), 10)).toBe(initialVal);
 	});
+
+	test('toggles table naming between letters and numbers', async ({ page }) => {
+		await page.goto(`${BASE}/`);
+
+		// Dismiss wizard if open
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// Calculate seating
+		await page.locator('.btn-primary').click();
+		await page.waitForTimeout(200);
+
+		// By default, tables are labeled with letters (Стіл A)
+		const firstTableLabel = page.locator('.table-label').first();
+		await expect(firstTableLabel).toContainText('A');
+
+		// Switch to numbers format
+		const numbersBtn = page.locator('[data-testid="table-naming-numbers"]');
+		await numbersBtn.click();
+		await expect(firstTableLabel).toContainText('1');
+
+		// Switch back to letters
+		const lettersBtn = page.locator('[data-testid="table-naming-letters"]');
+		await lettersBtn.click();
+		await expect(firstTableLabel).toContainText('A');
+	});
 });

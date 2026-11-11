@@ -36,5 +36,10 @@
 	"capacity_ok": "Great: capacity of {total} seats (fits {people} people)",
 	"skin_classic": "Classic",
 	"skin_compact": "Compact",
-	"skin_visual": "Visual"
+	"skin_visual": "Visual",
+	"table_format": "Tables format",
+	"participant_format": "Guests format",
+	"format_letters": "A, B, C...",
+	"format_numbers": "1, 2, 3...",
+	"naming_settings": "Labeling format"
 }

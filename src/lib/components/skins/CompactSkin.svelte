@@ -3,6 +3,7 @@
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import NumberStepper from '$lib/components/ui/NumberStepper.svelte';
+	import NamingControls from '$lib/components/ui/NamingControls.svelte';
 	import { Sparkle, ArrowsCounterClockwise } from 'phosphor-svelte';
 
 	const seating = getContext<SeatingController>('seating');
@@ -56,6 +57,10 @@
 		</div>
 	</section>
 
+	<div style="margin-bottom: 1.25rem;">
+		<NamingControls />
+	</div>
+
 	{#if seating.rounds.length > 0}
 		<div class="compact-grid">
 			{#each seating.rounds as round, rIndex}
@@ -64,8 +69,10 @@
 					<div class="tables">
 						{#each round as table, tIndex}
 							<div class="mini-table">
-								<span class="t-id">T{tIndex + 1}:</span>
-								<span class="t-p">{table.join(', ')}</span>
+								<span class="t-id">T{seating.getTableLabel(tIndex)}:</span>
+								<span class="t-p"
+									>{table.map((id) => seating.getParticipantName(id)).join(', ')}</span
+								>
 							</div>
 						{/each}
 					</div>

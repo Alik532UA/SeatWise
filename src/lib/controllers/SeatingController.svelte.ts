@@ -1,6 +1,27 @@
 import { generatePerfectPlane, generateUntilFullyConnected } from '../algorithms/seating';
 import type { SeatingPlan } from '../types/seating';
 import * as m from '../paraglide/messages';
+import { storage } from '$lib/services/storage';
+
+/**
+ * Варіанти маркування столів або гостей/місць.
+ */
+export type NamingMode = 'letters' | 'numbers';
+
+/**
+ * Перетворює числовий індекс (0-based) у бієктивне літерне позначення:
+ * 0 -> A, 1 -> B, ..., 25 -> Z, 26 -> AA, 27 -> AB...
+ */
+export function indexToLetter(index: number): string {
+	if (index < 0) return '';
+	let result = '';
+	let num = index;
+	while (num >= 0) {
+		result = String.fromCharCode(65 + (num % 26)) + result;
+		num = Math.floor(num / 26) - 1;
+	}
+	return result;
+}
 
 export class SeatingController {
 	totalPeople = $state(20);
@@ -13,7 +34,56 @@ export class SeatingController {
 	isCopied = $state(false);
 
 	/**
-	 * Список імен учасників, отриманий з поля вводу.
+	 * Режими нумерації столів та учасників/місць.
+	 * За замовчуванням: столи — літери (A, B, C...), гості — цифри (1, 2, 3...).
+	 */
+	tableNaming = $state<NamingMode>('letters');
+	participantNaming = $state<NamingMode>('numbers');
+
+	constructor() {
+		const savedTable = storage.get('table_naming') as NamingMode | null;
+		if (savedTable === 'letters' || savedTable === 'numbers') {
+			this.tableNaming = savedTable;
+		}
+
+		const savedParticipant = storage.get('participant_naming') as NamingMode | null;
+		if (savedParticipant === 'letters' || savedParticipant === 'numbers') {
+			this.participantNaming = savedParticipant;
+		}
+	}
+
+	setTableNaming(mode: NamingMode) {
+		this.tableNaming = mode;
+		storage.set('table_naming', mode);
+	}
+
+	setParticipantNaming(mode: NamingMode) {
+		this.participantNaming = mode;
+		storage.set('participant_naming', mode);
+	}
+
+	/**
+	 * Отримує мітку/назву столу за його індексом (0-based).
+	 */
+	getTableLabel(index: number): string {
+		if (this.tableNaming === 'letters') {
+			return indexToLetter(index);
+		}
+		return (index + 1).toString();
+	}
+
+	/**
+	 * Отримує мітку гостя за замовчуванням (коли ім'я не задано).
+	 */
+	getParticipantDefaultName(id: number): string {
+		if (this.participantNaming === 'letters') {
+			return indexToLetter(id - 1);
+		}
+		return id.toString();
+	}
+
+	/**
+	 * Список імен учасників, отриманий з поля вводу або згенерований за замовчуванням.
 	 */
 	participantNames = $derived.by(() => {
 		const names = this.namesInput
@@ -23,24 +93,25 @@ export class SeatingController {
 
 		const list: string[] = [];
 		for (let i = 1; i <= this.totalPeople; i++) {
-			list.push(names[i - 1] || i.toString());
+			list.push(names[i - 1] || this.getParticipantDefaultName(i));
 		}
 		return list;
 	});
 
 	/**
-	 * Отримує ім'я учасника за його ID (1-N).
+	 * Отримує ім'я або позначення учасника за його ID (1-N).
 	 */
 	getParticipantName(id: number): string {
-		return this.participantNames[id - 1] || id.toString();
+		return this.participantNames[id - 1] || this.getParticipantDefaultName(id);
 	}
 
 	/**
-	 * Отримує ініціали учасника за його ID.
+	 * Отримує ініціали або коротке позначення учасника за його ID.
 	 */
 	getInitials(id: number): string {
 		const name = this.getParticipantName(id);
-		if (!isNaN(Number(name))) return name; // Якщо це просто число
+		// Якщо це число або коротка літера (A, B, AA тощо)
+		if (!isNaN(Number(name)) || /^[A-Z]{1,3}$/.test(name)) return name;
 
 		const parts = name.split(' ').filter((p) => p.length > 0);
 		if (parts.length >= 2) {
@@ -64,7 +135,7 @@ export class SeatingController {
 			const activeTables = round.filter((t) => t.length > 0);
 			activeTables.forEach((table, tableIdx) => {
 				const names = table.map((id) => this.getParticipantName(id)).join(', ');
-				text += `${m.table()} ${tableIdx + 1}: ${names}\n`;
+				text += `${m.table()} ${this.getTableLabel(tableIdx)}: ${names}\n`;
 			});
 			text += `\n`;
 		});
