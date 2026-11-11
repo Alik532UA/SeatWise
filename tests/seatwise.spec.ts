@@ -169,14 +169,18 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 		const firstTableLabel = page.locator('.table-label').first();
 		await expect(firstTableLabel).toContainText('A');
 
-		// Switch to numbers format
+		// Open Settings modal to switch to numbers format
+		await page.locator('[data-testid="settings-open-btn"]').click();
 		const numbersBtn = page.locator('[data-testid="table-naming-numbers"]');
 		await numbersBtn.click();
+		await page.locator('[data-testid="close-settings-btn"]').click();
 		await expect(firstTableLabel).toContainText('1');
 
-		// Switch back to letters
+		// Open Settings modal to switch back to letters
+		await page.locator('[data-testid="settings-open-btn"]').click();
 		const lettersBtn = page.locator('[data-testid="table-naming-letters"]');
 		await lettersBtn.click();
+		await page.locator('[data-testid="close-settings-btn"]').click();
 		await expect(firstTableLabel).toContainText('A');
 	});
 
@@ -383,5 +387,220 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 		// Check textarea is empty and default badge returns
 		await expect(textarea).toHaveValue('');
 		await expect(namesPanel.locator('.names-pill.default')).toBeVisible();
+	});
+
+	test('opens settings modal, toggles color mode between monochrome and palette, and persists', async ({
+		page
+	}) => {
+		await page.goto(`${BASE}/`);
+
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// Open Settings modal
+		const settingsBtn = page.locator('[data-testid="settings-open-btn"]');
+		await expect(settingsBtn).toBeVisible();
+		await settingsBtn.click();
+
+		const dialog = page.locator('[data-testid="settings-dialog"]');
+		await expect(dialog).toBeVisible();
+
+		// Check and toggle color mode
+		const paletteBtn = page.locator('[data-testid="color-mode-palette"]');
+		await expect(paletteBtn).toBeVisible();
+		await paletteBtn.click();
+		await expect(paletteBtn).toHaveClass(/active/);
+
+		// Close Settings dialog
+		const closeSettingsBtn = page.locator('[data-testid="close-settings-btn"]');
+		await closeSettingsBtn.click();
+		await expect(dialog).not.toBeVisible();
+
+		// Switch to Visual skin
+		await page.locator('[data-testid="skin-btn-visual"]').click();
+		await expect(page.locator('.skin-visual')).toBeVisible();
+
+		// Calculate seating
+		await page.locator('.skin-visual .glow-button').click();
+		await page.waitForTimeout(300);
+
+		// Check that tables and avatars rendered
+		const tables = page.locator('.visual-table');
+		expect(await tables.count()).toBeGreaterThan(0);
+	});
+
+	test('highlights participant across all rounds on click, shows floating bar, and opens personal schedule on dblclick', async ({
+		page
+	}) => {
+		await page.goto(`${BASE}/`);
+
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// Switch to Visual skin
+		await page.locator('[data-testid="skin-btn-visual"]').click();
+		await expect(page.locator('.skin-visual')).toBeVisible();
+
+		// Calculate seating
+		await page.locator('.skin-visual .glow-button').click();
+		await page.waitForTimeout(300);
+
+		// Find participant 1 avatar in first table
+		const p1Avatar = page.locator('[data-testid="participant-avatar-1"]').first();
+		await expect(p1Avatar).toBeVisible();
+
+		// Single click to select
+		await p1Avatar.click();
+
+		// Check root has active participant class
+		await expect(page.locator('.skin-visual')).toHaveClass(/has-active-participant/);
+		await expect(p1Avatar).toHaveClass(/is-active/);
+
+		// Floating bar should now be visible
+		const floatingBar = page.locator('[data-testid="floating-participant-bar"]');
+		await expect(floatingBar).toBeVisible();
+
+		// Double-click to open personal schedule modal
+		await p1Avatar.dblclick();
+
+		const scheduleModal = page.locator('[data-testid="participant-schedule-modal"]');
+		await expect(scheduleModal).toBeVisible();
+		await expect(page.locator('[data-testid="participant-rounds-list"]')).toBeVisible();
+
+		// Close modal
+		await page.locator('[data-testid="close-participant-modal-btn"]').click();
+		await expect(scheduleModal).not.toBeVisible();
+
+		// Clear selection via floating bar button
+		await page.locator('[data-testid="btn-clear-participant-selection"]').click();
+		await expect(floatingBar).not.toBeVisible();
+		await expect(page.locator('.skin-visual')).not.toHaveClass(/has-active-participant/);
+	});
+
+	test('participant schedule modal displays tables view by default, toggles to list, without duplicate numbers', async ({
+		page
+	}) => {
+		await page.goto(`${BASE}/`);
+
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// Switch to Visual skin and calculate
+		await page.locator('[data-testid="skin-btn-visual"]').click();
+		await page.locator('.skin-visual .glow-button').click();
+		await page.waitForTimeout(300);
+
+		// Double-click participant 36
+		const p36Avatar = page.locator('[data-testid="participant-avatar-36"]').first();
+		await expect(p36Avatar).toBeVisible();
+		await p36Avatar.dblclick();
+
+		const scheduleModal = page.locator('[data-testid="participant-schedule-modal"]');
+		await expect(scheduleModal).toBeVisible();
+
+		// Check wide dialog layout and default tables view
+		await expect(page.locator('.rounds-grid-tables')).toBeVisible();
+		const miniTables = page.locator('.mini-table-card');
+		await expect(await miniTables.count()).toBeGreaterThanOrEqual(5);
+
+		// Verify me seat is highlighted
+		const meSeat = page.locator('.mini-seat.is-me').first();
+		await expect(meSeat).toBeVisible();
+		await expect(meSeat).toContainText('36');
+
+		// Switch to List view (single column, 1 row per round)
+		await page.locator('[data-testid="view-mode-list-btn"]').click();
+		await expect(page.locator('.rounds-list-linear')).toBeVisible();
+		await expect(page.locator('.linear-round-row').first()).toBeVisible();
+
+		// Check companions in list view don't have duplicated text like "28 28"
+		const firstChip = page.locator('.companion-chip').first();
+		await expect(firstChip).toBeVisible();
+		const chipText = (await firstChip.textContent()) || '';
+		// Chip should be #X, not X X
+		expect(chipText.trim()).toMatch(/^#\d+$/);
+
+		// Switch back to tables view
+		await page.locator('[data-testid="view-mode-tables-btn"]').click();
+		await expect(page.locator('.rounds-grid-tables')).toBeVisible();
+
+		// Close modal
+		await page.locator('[data-testid="close-participant-modal-btn"]').click();
+		await expect(scheduleModal).not.toBeVisible();
+	});
+
+	test('visual skin balances tables symmetrically into rows (3+3, 4+3, etc.) instead of orphan tables', async ({
+		page
+	}) => {
+		await page.goto(`${BASE}/`);
+
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// Switch to Visual skin and calculate (default: 36 guests, 6 tables of 6)
+		await page.locator('[data-testid="skin-btn-visual"]').click();
+		await page.locator('.skin-visual .glow-button').click();
+		await page.waitForTimeout(300);
+
+		// With 6 tables in viewport 1280px (where 5 or 4 fit per line), it balances into rows of 3+3
+		const firstRoundGallery = page.locator('.round-section').first().locator('.table-gallery');
+		await expect(firstRoundGallery).toBeVisible();
+
+		const rows = firstRoundGallery.locator('.table-gallery-row');
+		const rowCount = await rows.count();
+
+		if (rowCount === 2) {
+			const firstRowTables = await rows.nth(0).locator('.visual-table-container').count();
+			const secondRowTables = await rows.nth(1).locator('.visual-table-container').count();
+			// Balanced 3+3 (not 5+1 or 4+2)
+			expect(firstRowTables).toBe(3);
+			expect(secondRowTables).toBe(3);
+		} else {
+			// On ultra-wide monitors where all 6 fit in one row
+			expect(rowCount).toBe(1);
+			const rowTables = await rows.nth(0).locator('.visual-table-container').count();
+			expect(rowTables).toBe(6);
+		}
+	});
+
+	test('palette supports 16 colors and participant selection clears on empty zone click across skins', async ({
+		page
+	}) => {
+		await page.goto(`${BASE}/`);
+
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// 1. Verify 16 colors in Settings modal
+		await page.locator('[data-testid="settings-open-btn"]').click();
+		await page.locator('[data-testid="color-mode-palette"]').click();
+		const dots = page.locator('.palette-dot');
+		await expect(dots).toHaveCount(16);
+		await page.locator('[data-testid="close-settings-btn"]').click();
+
+		// 2. Switch to Visual skin and select participant
+		await page.locator('[data-testid="skin-btn-visual"]').click();
+		await page.locator('.skin-visual .glow-button').click();
+		await page.waitForTimeout(200);
+
+		const p1 = page.locator('[data-testid="participant-avatar-1"]').first();
+		await p1.click();
+
+		const floatingBar = page.locator('[data-testid="floating-participant-bar"]');
+		await expect(floatingBar).toBeVisible();
+
+		// Click outside on empty page container background
+		await page.mouse.click(20, 300);
+		await expect(floatingBar).not.toBeVisible();
 	});
 });

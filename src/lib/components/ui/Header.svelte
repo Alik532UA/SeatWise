@@ -5,7 +5,7 @@
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { setLocale, getLocale, locales } from '$lib/paraglide/runtime';
-	import { Sparkle, ArrowSquareOut, Sun, Moon, Compass } from 'phosphor-svelte';
+	import { RocketLaunch, ArrowSquareOut, Sun, Moon, Compass, Gear } from 'phosphor-svelte';
 
 	const theme = getContext<ThemeController>('theme');
 	const ui = getContext<UIController>('ui');
@@ -46,9 +46,10 @@
 			data-testid="order-cta-btn"
 			title={m.order_cta()}
 		>
-			<Sparkle size={16} weight="bold" />
-			<span>{m.order_cta()}</span>
-			<ArrowSquareOut size={14} weight="bold" />
+			<RocketLaunch size={16} weight="bold" />
+			<span class="cta-full-text">{m.order_cta()}</span>
+			<span class="cta-short-text">{m.order_cta_short?.() || 'Замовити сайт ↗'}</span>
+			<span class="cta-arrow"><ArrowSquareOut size={14} weight="bold" /></span>
 		</a>
 
 		<div
@@ -94,6 +95,17 @@
 
 		<button
 			type="button"
+			class="settings-btn touch-target"
+			onclick={() => ui.toggleSettings()}
+			title={m.settings?.() || 'Налаштування'}
+			aria-label={m.settings?.() || 'Налаштування'}
+			data-testid="settings-open-btn"
+		>
+			<Gear size={18} weight="bold" />
+		</button>
+
+		<button
+			type="button"
 			class="theme-toggle touch-target"
 			onclick={() => theme.toggle()}
 			title="Toggle Theme"
@@ -128,36 +140,54 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.85rem clamp(0.75rem, 3vw, 2rem);
+		padding: 0.65rem clamp(0.75rem, 2.5vw, 1.75rem);
 		background-color: var(--bg-secondary);
 		border-bottom: 1px solid var(--border-color);
-		flex-wrap: wrap;
-		gap: 1rem;
+		flex-wrap: nowrap;
+		gap: 0.75rem 1.25rem;
 		transition:
 			background-color 0.2s,
 			border-color 0.2s;
 	}
 
+	.logo {
+		flex: 0 1 auto;
+		min-width: 0;
+	}
+
 	.logo h1 {
 		margin: 0;
-		font-size: 1.35rem;
+		font-size: clamp(1.05rem, 1.35vw, 1.25rem);
 		font-weight: 700;
 		color: var(--text-primary);
 		line-height: 1.2;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.subtitle {
-		margin: 0.25rem 0 0;
-		font-size: 0.85rem;
+		margin: 0.2rem 0 0;
+		font-size: 0.78rem;
 		color: var(--text-secondary);
-		line-height: 1.3;
+		line-height: 1.25;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 440px;
+	}
+
+	@media (max-width: 1240px) {
+		.subtitle {
+			display: none;
+		}
 	}
 
 	.controls {
 		display: flex;
 		align-items: center;
-		flex-wrap: wrap;
-		gap: 0.6rem;
+		flex-shrink: 0;
+		gap: 0.5rem;
 	}
 
 	/* Wizard launcher button */
@@ -191,7 +221,7 @@
 		align-items: center;
 		gap: 0.45rem;
 		height: 38px;
-		padding: 0 0.95rem;
+		padding: 0 0.85rem;
 		box-sizing: border-box;
 		background: linear-gradient(135deg, #2563eb, #3b82f6);
 		color: #ffffff !important;
@@ -216,6 +246,26 @@
 
 	.order-cta-btn:active {
 		transform: translateY(0);
+	}
+
+	.cta-full-text {
+		display: inline;
+	}
+
+	.cta-short-text {
+		display: none;
+	}
+
+	@media (max-width: 1400px) {
+		.cta-full-text {
+			display: none;
+		}
+		.cta-short-text {
+			display: inline;
+		}
+		.cta-arrow {
+			display: none;
+		}
 	}
 
 	/* 2. Skin Selector as Checkbox/Segmented Buttons */
@@ -255,6 +305,35 @@
 		background-color: var(--accent-primary);
 		color: #ffffff;
 		box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
+	}
+
+	/* Settings Button */
+	.settings-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 38px;
+		height: 38px;
+		box-sizing: border-box;
+		background-color: var(--bg-card);
+		border: 1px solid var(--border-color);
+		color: var(--text-primary);
+		border-radius: 8px;
+		cursor: pointer;
+		transition:
+			border-color 0.15s ease,
+			color 0.15s ease,
+			transform 0.15s ease;
+	}
+
+	.settings-btn:hover {
+		border-color: var(--accent-primary);
+		color: var(--accent-primary);
+		transform: translateY(-1px);
+	}
+
+	.settings-btn:active {
+		transform: translateY(0);
 	}
 
 	/* 3. Theme Toggle */
@@ -324,16 +403,18 @@
 		color: #ffffff;
 	}
 
-	@media (max-width: 768px) {
+	@media (max-width: 960px) {
 		.main-header {
 			flex-direction: column;
 			align-items: flex-start;
 			gap: 0.75rem;
+			flex-wrap: wrap;
 		}
 
 		.controls {
 			width: 100%;
 			justify-content: flex-start;
+			flex-wrap: wrap;
 		}
 	}
 </style>

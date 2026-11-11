@@ -5,6 +5,8 @@
 	import { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import { errorLogger } from '$lib/services/errorLogger';
 	import Header from '$lib/components/ui/Header.svelte';
+	import SettingsModal from '$lib/components/ui/SettingsModal.svelte';
+	import ParticipantScheduleModal from '$lib/components/ui/ParticipantScheduleModal.svelte';
 	import ServiceLayer from '$lib/components/ui/ServiceLayer.svelte';
 	import '../app.css';
 
@@ -51,6 +53,8 @@
 	<main>
 		{@render children()}
 	</main>
+	<SettingsModal />
+	<ParticipantScheduleModal />
 	<ServiceLayer />
 </div>
 

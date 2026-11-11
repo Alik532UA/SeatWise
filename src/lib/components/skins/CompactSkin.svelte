@@ -3,7 +3,6 @@
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import NumberStepper from '$lib/components/ui/NumberStepper.svelte';
-	import NamingControls from '$lib/components/ui/NamingControls.svelte';
 	import {
 		Sparkle,
 		ArrowsCounterClockwise,
@@ -16,7 +15,7 @@
 	const seating = getContext<SeatingController>('seating');
 </script>
 
-<div class="skin-compact">
+<div class="skin-compact" class:has-active-participant={seating.activeParticipantId !== null}>
 	<section class="config-bar">
 		<div class="field">
 			<span class="label">N:</span>
@@ -70,21 +69,24 @@
 		</div>
 	</section>
 
-	<div class="controls-row">
-		<NamingControls />
-	</div>
-
-	<details class="names-details">
+	<details class="names-details" open={seating.namesInput.trim().length > 0}>
 		<summary class="names-summary">
-			<Users size={15} weight="bold" />
-			<span>{m.participants_list()} ({seating.participantNames.length})</span>
+			<div class="summary-left">
+				<Users size={15} weight="bold" />
+				<span>{m.participants_list()} ({seating.participantNames.length})</span>
+			</div>
+			<span class="names-status-pill">
+				{seating.namesInput.trim().length > 0
+					? `${seating.participantNames.length} / ${seating.totalPeople}`
+					: `1..${seating.totalPeople}`}
+			</span>
 		</summary>
 		<div class="names-body">
 			<textarea
 				id="namesInput"
 				bind:value={seating.namesInput}
 				placeholder={m.participants_placeholder()}
-				rows="4"
+				rows="3"
 				class="compact-textarea"
 			></textarea>
 		</div>
@@ -127,11 +129,30 @@
 					<div class="tables">
 						{#each round as table, tIndex}
 							{#if table.length > 0}
-								<div class="mini-table">
+								<div
+									class="mini-table"
+									class:table-active={seating.activeParticipantId !== null &&
+										table.includes(seating.activeParticipantId)}
+								>
 									<span class="t-id">T{seating.getTableLabel(tIndex)}:</span>
-									<span class="t-p"
-										>{table.map((id) => seating.getParticipantName(id)).join(', ')}</span
-									>
+									<span class="t-p">
+										{#each table as person, pIndex}
+											{#if pIndex > 0},
+											{/if}
+											<button
+												type="button"
+												class="compact-person-btn"
+												class:is-active={seating.activeParticipantId === person}
+												title="{seating.getParticipantName(person)} ({m.click_to_inspect()})"
+												onmouseenter={() => seating.setHoveredParticipant(person)}
+												onmouseleave={() => seating.setHoveredParticipant(null)}
+												onclick={() => seating.toggleSelectedParticipant(person)}
+												ondblclick={() => seating.openParticipantModal(person)}
+											>
+												{seating.getParticipantName(person)}
+											</button>
+										{/each}
+									</span>
 								</div>
 							{/if}
 						{/each}
@@ -163,14 +184,14 @@
 		font-size: 0.85rem;
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 0.65rem;
 	}
 
 	.config-bar {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.85rem;
-		padding: 0.75rem 1rem;
+		padding: 0.6rem 0.9rem;
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: 8px;
@@ -193,10 +214,6 @@
 		max-width: 100%;
 	}
 
-	.controls-row {
-		width: 100%;
-	}
-
 	.names-details {
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
@@ -211,14 +228,30 @@
 	.names-summary {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
 		gap: 0.5rem;
-		padding: 0.6rem 0.85rem;
+		padding: 0.45rem 0.85rem;
 		cursor: pointer;
 		user-select: none;
 		font-weight: 600;
 		color: var(--text-secondary);
 		background: var(--bg-secondary);
 		transition: color 0.15s ease;
+	}
+
+	.summary-left {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.names-status-pill {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--accent-primary);
+		background: rgba(37, 99, 235, 0.1);
+		padding: 2px 8px;
+		border-radius: 6px;
 	}
 
 	.names-summary:hover {
@@ -437,6 +470,15 @@
 	.mini-table {
 		display: flex;
 		gap: 0.5rem;
+		transition: opacity 0.2s ease;
+	}
+
+	.skin-compact.has-active-participant .mini-table:not(.table-active) {
+		opacity: 0.35;
+	}
+
+	.skin-compact.has-active-participant .mini-table.table-active {
+		opacity: 1;
 	}
 
 	.t-id {
@@ -448,5 +490,33 @@
 	.t-p {
 		color: var(--text-primary);
 		word-break: break-all;
+	}
+
+	.compact-person-btn {
+		background: transparent;
+		border: none;
+		padding: 1px 4px;
+		border-radius: 4px;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.compact-person-btn:hover {
+		background: rgba(37, 99, 235, 0.15);
+		color: var(--accent-primary);
+	}
+
+	.skin-compact.has-active-participant .compact-person-btn:not(.is-active) {
+		opacity: 0.35;
+	}
+
+	.skin-compact.has-active-participant .compact-person-btn.is-active {
+		background: #fef3c7;
+		color: #b45309;
+		font-weight: 700;
+		outline: 2px solid #f59e0b;
+		opacity: 1 !important;
 	}
 </style>

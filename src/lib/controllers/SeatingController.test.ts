@@ -176,4 +176,63 @@ describe('SeatingController (Runes State & Seating Logic)', () => {
 
 		vi.restoreAllMocks();
 	});
+
+	it('extracts participant cross-round schedule accurately and formats text', () => {
+		const controller = new SeatingController();
+		controller.totalPeople = 4;
+		controller.tableCount = 2;
+		controller.tableCapacity = 2;
+		controller.setTableNaming('letters');
+		controller.rounds = [
+			// Round 1: Table A: [1, 2], Table B: [3, 4]
+			[
+				[1, 2],
+				[3, 4]
+			],
+			// Round 2: Table A: [1, 3], Table B: [2, 4]
+			[
+				[1, 3],
+				[2, 4]
+			]
+		];
+
+		const sched1 = controller.getParticipantSchedule(1);
+		expect(sched1.length).toBe(2);
+		expect(sched1[0]).toEqual({
+			roundIndex: 0,
+			roundNumber: 1,
+			tableIndex: 0,
+			tableLabel: 'A',
+			tableColor: 'var(--accent-primary)',
+			companions: [2]
+		});
+		expect(sched1[1]).toEqual({
+			roundIndex: 1,
+			roundNumber: 2,
+			tableIndex: 0,
+			tableLabel: 'A',
+			tableColor: 'var(--accent-primary)',
+			companions: [3]
+		});
+
+		const sched4 = controller.getParticipantSchedule(4);
+		expect(sched4.length).toBe(2);
+		expect(sched4[0].tableLabel).toBe('B');
+		expect(sched4[0].companions).toEqual([3]);
+		expect(sched4[1].tableLabel).toBe('B');
+		expect(sched4[1].companions).toEqual([2]);
+
+		const text = controller.formatParticipantScheduleText(1);
+		expect(text).toContain('Раунд 1: Стіл A');
+		expect(text).toContain('Раунд 2: Стіл A');
+
+		// Toggle selection
+		expect(controller.selectedParticipantId).toBeNull();
+		controller.toggleSelectedParticipant(1);
+		expect(controller.selectedParticipantId).toBe(1);
+		expect(controller.activeParticipantId).toBe(1);
+
+		controller.toggleSelectedParticipant(1);
+		expect(controller.selectedParticipantId).toBeNull();
+	});
 });

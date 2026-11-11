@@ -9,6 +9,35 @@ import { storage } from '$lib/services/storage';
 export type NamingMode = 'letters' | 'numbers';
 
 /**
+ * Варіанти кольорової схеми столів:
+ * - 'monochrome': єдиний фірмовий акцентний колір (за замовчуванням)
+ * - 'palette': різні гармонійні кольори для кожного столу
+ */
+export type TableColorMode = 'monochrome' | 'palette';
+
+/**
+ * Гармонійна палітра для розрізнення столів (16 кольорів).
+ */
+export const TABLE_PALETTE = [
+	'#2563eb', // 1. Blue
+	'#059669', // 2. Emerald
+	'#7c3aed', // 3. Violet
+	'#d97706', // 4. Amber
+	'#db2777', // 5. Rose / Magenta
+	'#0891b2', // 6. Cyan
+	'#ea580c', // 7. Orange
+	'#4f46e5', // 8. Indigo
+	'#0d9488', // 9. Teal
+	'#e11d48', // 10. Crimson Red
+	'#65a30d', // 11. Lime
+	'#9333ea', // 12. Purple
+	'#0284c7', // 13. Sky Blue
+	'#ca8a04', // 14. Golden Yellow
+	'#c026d3', // 15. Fuchsia
+	'#475569' // 16. Slate / Steel
+];
+
+/**
  * Перетворює числовий індекс (0-based) у бієктивне літерне позначення:
  * 0 -> A, 1 -> B, ..., 25 -> Z, 26 -> AA, 27 -> AB...
  */
@@ -23,6 +52,18 @@ export function indexToLetter(index: number): string {
 	return result;
 }
 
+/**
+ * Інформація про розміщення учасника в окремому раунді.
+ */
+export interface ParticipantRoundInfo {
+	roundIndex: number;
+	roundNumber: number;
+	tableIndex: number;
+	tableLabel: string;
+	tableColor: string;
+	companions: number[];
+}
+
 export class SeatingController {
 	totalPeople = $state(36);
 	tableCount = $state(6);
@@ -34,13 +75,34 @@ export class SeatingController {
 	isCopied = $state(false);
 
 	/**
+	 * Крос-раундове підсвічування та вибір учасника.
+	 */
+	hoveredParticipantId = $state<number | null>(null);
+	selectedParticipantId = $state<number | null>(null);
+	searchQuery = $state('');
+	isParticipantModalOpen = $state(false);
+	modalParticipantId = $state<number | null>(null);
+	isParticipantCopied = $state(false);
+
+	/**
+	 * Активний ID учасника (наведений або зафіксований).
+	 */
+	activeParticipantId = $derived(this.hoveredParticipantId ?? this.selectedParticipantId);
+
+	/**
 	 * Режими нумерації столів та учасників/місць.
 	 * За замовчуванням: столи — літери (A, B, C...), гості — цифри (1, 2, 3...).
 	 */
 	tableNaming = $state<NamingMode>('letters');
 	participantNaming = $state<NamingMode>('numbers');
+	tableColorMode = $state<TableColorMode>('monochrome');
 
 	constructor() {
+		const savedColorMode = storage.get('table_color_mode') as TableColorMode | null;
+		if (savedColorMode === 'monochrome' || savedColorMode === 'palette') {
+			this.tableColorMode = savedColorMode;
+		}
+
 		const savedTable = storage.get('table_naming') as NamingMode | null;
 		if (savedTable === 'letters' || savedTable === 'numbers') {
 			this.tableNaming = savedTable;
@@ -108,6 +170,125 @@ export class SeatingController {
 		storage.set('participant_naming', mode);
 	}
 
+	setTableColorMode(mode: TableColorMode) {
+		this.tableColorMode = mode;
+		storage.set('table_color_mode', mode);
+	}
+
+	setHoveredParticipant(id: number | null) {
+		this.hoveredParticipantId = id;
+	}
+
+	toggleSelectedParticipant(id: number) {
+		if (this.selectedParticipantId === id) {
+			this.selectedParticipantId = null;
+		} else {
+			this.selectedParticipantId = id;
+		}
+	}
+
+	clearSelection() {
+		this.selectedParticipantId = null;
+		this.hoveredParticipantId = null;
+		this.searchQuery = '';
+	}
+
+	openParticipantModal(id: number) {
+		this.modalParticipantId = id;
+		this.selectedParticipantId = id;
+		this.isParticipantModalOpen = true;
+	}
+
+	closeParticipantModal() {
+		this.isParticipantModalOpen = false;
+	}
+
+	/**
+	 * Отримує повний індивідуальний розклад учасника за всіма раундами.
+	 */
+	getParticipantSchedule(id: number): ParticipantRoundInfo[] {
+		if (typeof id !== 'number' || isNaN(id) || this.rounds.length === 0) {
+			return [];
+		}
+
+		const schedule: ParticipantRoundInfo[] = [];
+
+		this.rounds.forEach((round, rIndex) => {
+			for (let tIndex = 0; tIndex < round.length; tIndex++) {
+				const table = round[tIndex];
+				if (table.includes(id)) {
+					schedule.push({
+						roundIndex: rIndex,
+						roundNumber: rIndex + 1,
+						tableIndex: tIndex,
+						tableLabel: this.getTableLabel(tIndex),
+						tableColor: this.getTableColor(tIndex),
+						companions: table.filter((personId) => personId !== id)
+					});
+					break;
+				}
+			}
+		});
+
+		return schedule;
+	}
+
+	/**
+	 * Форматує персональний план гостя у зручний текст для месенджерів.
+	 */
+	formatParticipantScheduleText(id: number): string {
+		const schedule = this.getParticipantSchedule(id);
+		if (schedule.length === 0) return '';
+
+		const name = this.getParticipantName(id);
+		let text = `${m.app_title()}\n`;
+		text += `${m.participant_schedule()}: ${name} (#${id})\n`;
+		text += `-----------------------------------\n\n`;
+
+		schedule.forEach((item) => {
+			const companionNames = item.companions.map((cId) => this.getParticipantName(cId)).join(', ');
+			text += `${m.round()} ${item.roundNumber}: ${m.table()} ${item.tableLabel}\n`;
+			if (companionNames) {
+				text += `  ${m.companions()}: ${companionNames}\n`;
+			}
+			text += `\n`;
+		});
+
+		return text.trim();
+	}
+
+	/**
+	 * Копіює персональний маршрут учасника в буфер обміну.
+	 */
+	async copyParticipantSchedule(id: number) {
+		const text = this.formatParticipantScheduleText(id);
+		if (!text) return;
+
+		try {
+			if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+				await navigator.clipboard.writeText(text);
+			}
+			this.isParticipantCopied = true;
+			setTimeout(() => {
+				this.isParticipantCopied = false;
+			}, 2000);
+		} catch (e) {
+			console.error('Failed to copy participant schedule:', e);
+		}
+	}
+
+	/**
+	 * Отримує колір для столу за його індексом.
+	 * Якщо режим 'palette' - повертає унікальний колір з гармонійної палітри,
+	 * якщо 'monochrome' - повертає стандартний CSS accent.
+	 */
+	getTableColor(index: number): string {
+		if (this.tableColorMode === 'palette') {
+			return TABLE_PALETTE[index % TABLE_PALETTE.length];
+		}
+		return 'var(--accent-primary)';
+	}
+
 	/**
 	 * Отримує мітку/назву столу за його індексом (0-based).
 	 */
@@ -143,6 +324,29 @@ export class SeatingController {
 			list.push(names[i - 1] || this.getParticipantDefaultName(i));
 		}
 		return list;
+	});
+
+	/**
+	 * Швидкий пошук учасників за запитом (номер або ім'я).
+	 */
+	filteredParticipants = $derived.by(() => {
+		const query = this.searchQuery.trim().toLowerCase();
+		if (!query) return [];
+
+		const matches: Array<{ id: number; name: string }> = [];
+		for (let i = 1; i <= this.totalPeople; i++) {
+			const name = this.getParticipantName(i);
+			const label = String(i);
+			if (
+				name.toLowerCase().includes(query) ||
+				label === query ||
+				this.getTableLabel(i - 1).toLowerCase() === query
+			) {
+				matches.push({ id: i, name });
+				if (matches.length >= 8) break;
+			}
+		}
+		return matches;
 	});
 
 	/**

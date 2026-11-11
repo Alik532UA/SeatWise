@@ -2,14 +2,16 @@
 	import { getContext } from 'svelte';
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
-	import { Sparkle, ArrowsCounterClockwise, Copy, Check, Target } from 'phosphor-svelte';
+	import { Sparkle, ArrowsCounterClockwise, Copy, Check, Target, Users } from 'phosphor-svelte';
 	import NumberStepper from '$lib/components/ui/NumberStepper.svelte';
-	import NamingControls from '$lib/components/ui/NamingControls.svelte';
 
 	const seating = getContext<SeatingController>('seating');
 </script>
 
-<div class="skin-classic skin-professional">
+<div
+	class="skin-classic skin-professional"
+	class:has-active-participant={seating.activeParticipantId !== null}
+>
 	<section class="config-panel">
 		<div class="input-group">
 			<label for="totalPeople">{m.total_people()}:</label>
@@ -60,17 +62,27 @@
 		</div>
 	</section>
 
-	<NamingControls />
-
-	<section class="names-panel">
-		<label for="namesInput">{m.participants_list()}:</label>
-		<textarea
-			id="namesInput"
-			bind:value={seating.namesInput}
-			placeholder={m.participants_placeholder()}
-			rows="5"
-		></textarea>
-	</section>
+	<details class="names-panel" open={seating.namesInput.trim().length > 0}>
+		<summary class="names-summary-classic">
+			<div class="summary-left">
+				<Users size={16} weight="duotone" />
+				<span>{m.participants_list()} ({seating.participantNames.length})</span>
+			</div>
+			<span class="names-pill">
+				{seating.namesInput.trim().length > 0
+					? `${seating.participantNames.length} / ${seating.totalPeople}`
+					: `1..${seating.totalPeople}`}
+			</span>
+		</summary>
+		<div class="names-body-classic">
+			<textarea
+				id="namesInput"
+				bind:value={seating.namesInput}
+				placeholder={m.participants_placeholder()}
+				rows="3"
+			></textarea>
+		</div>
+	</details>
 
 	{#if seating.errorMessage}
 		<div class="alert error">{seating.errorMessage}</div>
@@ -107,13 +119,28 @@
 					<div class="tables-list">
 						{#each round as table, tIndex}
 							{#if table.length > 0}
-								<div class="table-row">
+								<div
+									class="table-row"
+									class:table-active={seating.activeParticipantId !== null &&
+										table.includes(seating.activeParticipantId)}
+								>
 									<span class="table-label">{m.table()} {seating.getTableLabel(tIndex)}</span>
 									<div class="participants-grid">
 										{#each table as person}
-											<div class="person-avatar" title={seating.getParticipantName(person)}>
+											<button
+												type="button"
+												class="person-avatar touch-target"
+												class:is-active={seating.activeParticipantId === person}
+												title="{seating.getParticipantName(person)} ({m.click_to_inspect()})"
+												aria-label={seating.getParticipantName(person)}
+												onmouseenter={() => seating.setHoveredParticipant(person)}
+												onmouseleave={() => seating.setHoveredParticipant(null)}
+												onclick={() => seating.toggleSelectedParticipant(person)}
+												ondblclick={() => seating.openParticipantModal(person)}
+												data-testid="person-avatar-{person}"
+											>
 												{seating.getInitials(person)}
-											</div>
+											</button>
 										{/each}
 									</div>
 								</div>
@@ -151,17 +178,45 @@
 	}
 
 	.names-panel {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
 		background: var(--bg-card);
-		padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 2vw, 2rem);
 		border-radius: 12px;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 		border: 1px solid var(--border-color);
 		width: 100%;
 		max-width: 1200px;
 		box-sizing: border-box;
+		overflow: hidden;
+	}
+
+	.names-summary-classic {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.75rem 1.25rem;
+		cursor: pointer;
+		user-select: none;
+		font-weight: 600;
+		color: var(--text-primary);
+		background: var(--bg-secondary);
+	}
+
+	.summary-left {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.names-pill {
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--accent-primary);
+		background: rgba(37, 99, 235, 0.1);
+		padding: 2px 8px;
+		border-radius: 6px;
+	}
+
+	.names-body-classic {
+		padding: 0.85rem 1.25rem;
 	}
 
 	textarea {
@@ -382,10 +437,19 @@
 
 	.table-row {
 		display: flex;
-		align-items: flex-start;
-		gap: 1rem;
-		padding-bottom: 0.75rem;
+		align-items: center;
+		gap: 0.65rem;
+		padding-bottom: 0.5rem;
 		border-bottom: 1px solid var(--bg-secondary);
+		transition: opacity 0.2s ease;
+	}
+
+	.skin-classic.has-active-participant .table-row:not(.table-active) {
+		opacity: 0.35;
+	}
+
+	.skin-classic.has-active-participant .table-row.table-active {
+		opacity: 1;
 	}
 
 	.table-row:last-child {
@@ -393,23 +457,25 @@
 	}
 
 	.table-label {
-		font-size: 0.85rem;
+		font-size: 0.8rem;
 		font-weight: 700;
-		min-width: 60px;
+		min-width: 46px;
 		color: var(--text-secondary);
-		padding-top: 0.75rem;
+		padding-top: 0;
+		flex-shrink: 0;
 	}
 
 	.participants-grid {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.75rem;
-		padding: 0.5rem;
+		gap: 0.45rem;
+		padding: 0.25rem 0;
+		align-items: center;
 	}
 
 	.person-avatar {
-		width: 40px;
-		height: 40px;
+		width: 32px;
+		height: 32px;
 		background: var(--bg-secondary);
 		border: 2px solid var(--accent-primary);
 		color: var(--text-primary);
@@ -417,10 +483,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 0.9rem;
+		font-size: 0.8rem;
 		font-weight: 700;
 		transition: all 0.2s ease;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		cursor: pointer;
+		padding: 0;
+		outline: none;
+		user-select: none;
+		flex-shrink: 0;
 	}
 
 	.person-avatar:hover {
@@ -428,6 +499,22 @@
 		background: var(--accent-primary);
 		color: white;
 		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-		cursor: default;
+	}
+
+	.skin-classic.has-active-participant .person-avatar:not(.is-active) {
+		opacity: 0.35;
+		filter: grayscale(40%);
+	}
+
+	.skin-classic.has-active-participant .person-avatar.is-active {
+		opacity: 1 !important;
+		transform: scale(1.2) !important;
+		border: 3px solid #f59e0b !important;
+		color: #b45309 !important;
+		background: #ffffff !important;
+		box-shadow:
+			0 0 0 3px rgba(245, 158, 11, 0.4),
+			0 4px 14px rgba(245, 158, 11, 0.3) !important;
+		font-weight: 900;
 	}
 </style>

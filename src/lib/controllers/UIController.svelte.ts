@@ -12,6 +12,7 @@ export type UISkin = 'classic' | 'compact' | 'visual';
 export class UIController {
 	skin = $state<UISkin>('classic');
 	isOnboardingOpen = $state(false);
+	isSettingsOpen = $state(false);
 
 	constructor() {
 		const saved = storage.get('skin') as string | null;
@@ -40,5 +41,17 @@ export class UIController {
 	completeOnboarding() {
 		this.isOnboardingOpen = false;
 		storage.set('onboarding_completed', 'true');
+	}
+
+	openSettings() {
+		this.isSettingsOpen = true;
+	}
+
+	closeSettings() {
+		this.isSettingsOpen = false;
+	}
+
+	toggleSettings() {
+		this.isSettingsOpen = !this.isSettingsOpen;
 	}
 }
