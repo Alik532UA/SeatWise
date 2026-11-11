@@ -4,4 +4,8 @@ dist
 node_modules
 package-lock.json
 static
+src/lib/paraglide
+project.inlang
+test-results
+playwright-report
 
