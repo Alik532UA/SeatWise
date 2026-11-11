@@ -24,9 +24,9 @@ export function indexToLetter(index: number): string {
 }
 
 export class SeatingController {
-	totalPeople = $state(20);
-	tableCount = $state(8);
-	tableCapacity = $state(8);
+	totalPeople = $state(36);
+	tableCount = $state(6);
+	tableCapacity = $state(6);
 	namesInput = $state('');
 	rounds: SeatingPlan = $state([]);
 	errorMessage = $state('');
@@ -248,9 +248,9 @@ export class SeatingController {
 	 * Скидає стан до початкових значень.
 	 */
 	reset() {
-		this.totalPeople = 20;
-		this.tableCount = 8;
-		this.tableCapacity = 8;
+		this.totalPeople = 36;
+		this.tableCount = 6;
+		this.tableCapacity = 6;
 		this.namesInput = '';
 		this.rounds = [];
 		this.errorMessage = '';

@@ -139,7 +139,7 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 		}
 
 		const totalPeopleInput = page.locator('#totalPeople');
-		const initialVal = parseInt((await totalPeopleInput.inputValue()) || '20', 10);
+		const initialVal = parseInt((await totalPeopleInput.inputValue()) || '36', 10);
 
 		// Click + on totalPeople stepper
 		const plusBtn = page.locator('.input-group:has(#totalPeople) .btn-plus');

@@ -4,9 +4,9 @@ import { SeatingController, indexToLetter } from './SeatingController.svelte';
 describe('SeatingController (Runes State & Seating Logic)', () => {
 	it('initializes with default values including letter tables and number guests', () => {
 		const controller = new SeatingController();
-		expect(controller.totalPeople).toBe(20);
-		expect(controller.tableCount).toBe(8);
-		expect(controller.tableCapacity).toBe(8);
+		expect(controller.totalPeople).toBe(36);
+		expect(controller.tableCount).toBe(6);
+		expect(controller.tableCapacity).toBe(6);
 		expect(controller.rounds).toEqual([]);
 		expect(controller.errorMessage).toBe('');
 		expect(controller.isCalculating).toBe(false);
@@ -108,7 +108,9 @@ describe('SeatingController (Runes State & Seating Logic)', () => {
 		controller.namesInput = 'Test Name';
 		controller.reset();
 
-		expect(controller.totalPeople).toBe(20);
+		expect(controller.totalPeople).toBe(36);
+		expect(controller.tableCount).toBe(6);
+		expect(controller.tableCapacity).toBe(6);
 		expect(controller.namesInput).toBe('');
 		expect(controller.rounds).toEqual([]);
 	});

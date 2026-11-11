@@ -36,6 +36,9 @@
 		} else if (val <= 25) {
 			seating.tableCount = 5;
 			seating.tableCapacity = 5;
+		} else if (val <= 36) {
+			seating.tableCount = 6;
+			seating.tableCapacity = 6;
 		} else if (val <= 49) {
 			seating.tableCount = 7;
 			seating.tableCapacity = 7;
