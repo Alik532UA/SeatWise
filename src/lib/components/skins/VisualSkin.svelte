@@ -11,10 +11,19 @@
 		Sparkle,
 		ArrowsCounterClockwise,
 		Copy,
-		Check
+		Check,
+		CaretDown,
+		Trash
 	} from 'phosphor-svelte';
 
 	const seating = getContext<SeatingController>('seating');
+
+	const rawNamesCount = $derived(
+		seating.namesInput
+			.split('\n')
+			.map((n) => n.trim())
+			.filter((n) => n.length > 0).length
+	);
 </script>
 
 <div class="skin-visual">
@@ -79,15 +88,61 @@
 		<NamingControls />
 	</div>
 
-	<section class="names-panel-visual">
-		<label for="namesInput">{m.participants_list()}:</label>
-		<textarea
-			id="namesInput"
-			bind:value={seating.namesInput}
-			placeholder={m.participants_placeholder()}
-			rows="3"
-		></textarea>
-	</section>
+	<details class="names-panel-visual" open={rawNamesCount > 0}>
+		<summary class="names-visual-summary">
+			<div class="summary-left">
+				<div class="icon-wrap">
+					<Users size={18} weight="duotone" />
+				</div>
+				<span class="summary-title">{m.participants_list()}</span>
+				{#if rawNamesCount === 0}
+					<span class="names-pill default">
+						{m.format_numbers()}: 1..{seating.totalPeople}
+					</span>
+				{:else}
+					<span
+						class="names-pill"
+						class:match={rawNamesCount === seating.totalPeople}
+						class:over={rawNamesCount > seating.totalPeople}
+					>
+						{rawNamesCount} / {seating.totalPeople}
+					</span>
+				{/if}
+			</div>
+
+			<div class="summary-right">
+				<span class="toggle-text">{rawNamesCount > 0 ? 'Редагувати' : 'Ввести імена'}</span>
+				<CaretDown size={16} weight="bold" class="toggle-chevron" />
+			</div>
+		</summary>
+
+		<div class="names-visual-body">
+			<div class="names-body-toolbar">
+				<p class="names-hint">
+					{m.participants_placeholder()}
+				</p>
+				{#if rawNamesCount > 0}
+					<button
+						type="button"
+						class="btn-clear-names"
+						onclick={() => (seating.namesInput = '')}
+						title="Очистити список імен"
+					>
+						<Trash size={14} weight="bold" />
+						<span>{m.reset()}</span>
+					</button>
+				{/if}
+			</div>
+
+			<textarea
+				id="namesInput"
+				bind:value={seating.namesInput}
+				placeholder={m.participants_placeholder()}
+				rows="4"
+				class="visual-textarea"
+			></textarea>
+		</div>
+	</details>
 
 	{#if seating.errorMessage}
 		<div class="alert error">{seating.errorMessage}</div>
@@ -181,36 +236,188 @@
 	}
 
 	.names-panel-visual {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		background: var(--bg-card);
-		padding: 1rem 1.5rem;
+		background: rgba(255, 255, 255, 0.04);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
 		border-radius: 20px;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 		border: 1px solid var(--border-color);
 		max-width: 800px;
 		margin: 0 auto;
 		width: 100%;
+		box-sizing: border-box;
+		overflow: hidden;
+		transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
-	.names-panel-visual label {
-		font-size: 0.8rem;
+	.names-panel-visual:hover {
+		border-color: rgba(255, 255, 255, 0.25);
+	}
+
+	.names-visual-summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.9rem 1.25rem;
+		cursor: pointer;
+		user-select: none;
+		list-style: none;
+		transition: background 0.15s ease;
+	}
+
+	.names-visual-summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.names-visual-summary:hover {
+		background: rgba(255, 255, 255, 0.03);
+	}
+
+	.summary-left {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.icon-wrap {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: 10px;
+		background: rgba(59, 130, 246, 0.15);
+		color: var(--accent-primary);
+	}
+
+	.summary-title {
+		font-size: 0.95rem;
 		font-weight: 700;
-		color: var(--text-secondary);
-		text-transform: uppercase;
+		color: var(--text-primary);
+		letter-spacing: 0.01em;
 	}
 
-	textarea {
-		width: 100%;
-		padding: 0.75rem;
-		border: 1px solid var(--border-color);
+	.names-pill {
+		font-size: 0.75rem;
+		font-weight: 600;
+		padding: 3px 8px;
 		border-radius: 12px;
-		font-size: 0.9rem;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+		transition: all 0.2s ease;
+	}
+
+	.names-pill.default {
+		background: var(--bg-secondary);
+		color: var(--text-secondary);
+		border: 1px solid var(--border-color);
+	}
+
+	.names-pill:not(.default) {
+		background: rgba(59, 130, 246, 0.15);
+		color: var(--accent-primary);
+		border: 1px solid rgba(59, 130, 246, 0.3);
+	}
+
+	.names-pill.match {
+		background: rgba(34, 197, 94, 0.15);
+		color: #22c55e;
+		border-color: rgba(34, 197, 94, 0.35);
+	}
+
+	.names-pill.over {
+		background: rgba(245, 158, 11, 0.15);
+		color: #f59e0b;
+		border-color: rgba(245, 158, 11, 0.35);
+	}
+
+	.summary-right {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--text-secondary);
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+
+	.toggle-text {
+		font-size: 0.8rem;
+		opacity: 0.85;
+	}
+
+	:global(.toggle-chevron) {
+		transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+		opacity: 0.8;
+	}
+
+	.names-panel-visual[open] :global(.toggle-chevron) {
+		transform: rotate(180deg);
+	}
+
+	.names-visual-body {
+		padding: 0 1.25rem 1.25rem 1.25rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.names-body-toolbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.names-hint {
+		margin: 0;
+		font-size: 0.8rem;
+		color: var(--text-secondary);
+	}
+
+	.btn-clear-names {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 4px 10px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		border-radius: 8px;
+		background: transparent;
+		border: 1px solid var(--border-color);
+		color: var(--text-secondary);
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.btn-clear-names:hover {
+		background: rgba(239, 68, 68, 0.12);
+		color: #ef4444;
+		border-color: rgba(239, 68, 68, 0.3);
+	}
+
+	.visual-textarea {
+		width: 100%;
+		box-sizing: border-box;
+		padding: 0.85rem 1rem;
+		border: 1px solid var(--border-color);
+		border-radius: 14px;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		font-family: inherit;
 		background-color: var(--bg-primary);
 		color: var(--text-primary);
 		resize: vertical;
-		font-family: inherit;
+		min-height: 90px;
+		transition: all 0.2s ease;
+	}
+
+	.visual-textarea:focus {
+		outline: none;
+		border-color: var(--accent-primary);
+		box-shadow:
+			0 0 0 3px rgba(59, 130, 246, 0.25),
+			0 0 16px rgba(59, 130, 246, 0.15);
 	}
 
 	.stat-card {

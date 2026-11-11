@@ -333,4 +333,55 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 		const textareaVisible = await fallbackTextarea.isVisible();
 		expect(isCopied || textareaVisible).toBe(true);
 	});
+
+	test('visual skin names panel toggles accordion, displays live participant count and clears input', async ({
+		page
+	}) => {
+		await page.goto(`${BASE}/`);
+
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// Switch to Visual skin
+		await page.locator('[data-testid="skin-btn-visual"]').click();
+		await expect(page.locator('.skin-visual')).toBeVisible();
+
+		// Check names panel details & summary
+		const namesPanel = page.locator('.names-panel-visual');
+		await expect(namesPanel).toBeVisible();
+
+		// Initially default badge shows 1..36
+		const defaultPill = namesPanel.locator('.names-pill.default');
+		await expect(defaultPill).toBeVisible();
+
+		// Click to expand accordion
+		const summary = namesPanel.locator('.names-visual-summary');
+		await summary.click();
+
+		// Check textarea is now visible
+		const textarea = namesPanel.locator('textarea#namesInput');
+		await expect(textarea).toBeVisible();
+
+		// Enter custom names
+		await textarea.fill('Оксана\nТарас\nІрина');
+
+		// Check counter updates to 3 / 36
+		const activePill = namesPanel.locator('.names-pill:not(.default)');
+		await expect(activePill).toContainText('3 / 36');
+
+		await page.screenshot({
+			path: 'C:/Users/alik5/.gemini/antigravity/brain/cd3f1297-ad13-488f-8ba7-2cd87385f02d/visual_names_panel.png'
+		});
+
+		// Click clear button
+		const clearBtn = namesPanel.locator('.btn-clear-names');
+		await expect(clearBtn).toBeVisible();
+		await clearBtn.click();
+
+		// Check textarea is empty and default badge returns
+		await expect(textarea).toHaveValue('');
+		await expect(namesPanel.locator('.names-pill.default')).toBeVisible();
+	});
 });

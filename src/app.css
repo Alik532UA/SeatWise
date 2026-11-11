@@ -48,3 +48,10 @@ a {
 a:hover {
 	color: var(--accent-hover);
 }
+
+/* WCAG SC 1.4.3: High-contrast legible placeholder across themes */
+input::placeholder,
+textarea::placeholder {
+	color: var(--text-secondary);
+	opacity: 0.85;
+}
