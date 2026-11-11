@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -6,8 +6,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootDir = resolve(__dirname, '..');
 const buildDir = resolve(rootDir, 'build');
+const pkgPath = resolve(rootDir, 'package.json');
 
-const requiredFiles = ['index.html', '404.html'];
+const requiredFiles = ['index.html', '404.html', 'app-version.json'];
 
 let errors = 0;
 
@@ -18,6 +19,27 @@ for (const file of requiredFiles) {
 		errors++;
 	} else {
 		console.log(`✓ Validated build file: ${file}`);
+	}
+}
+
+// Validate build/app-version.json consistency with package.json (VERSIONING-v10 § 6)
+const versionFile = resolve(buildDir, 'app-version.json');
+if (existsSync(versionFile) && existsSync(pkgPath)) {
+	try {
+		const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+		const built = JSON.parse(readFileSync(versionFile, 'utf8'));
+
+		if (built.version !== pkg.version) {
+			console.error(
+				`❌ Version mismatch in build: ${built.version} in app-version.json vs ${pkg.version} in package.json`
+			);
+			errors++;
+		} else {
+			console.log(`✓ Validated app-version.json matches package.json: ${pkg.version}`);
+		}
+	} catch (e) {
+		console.error(`❌ Failed parsing app-version.json or package.json: ${e}`);
+		errors++;
 	}
 }
 

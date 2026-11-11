@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import { ThemeController } from '$lib/controllers/ThemeController.svelte';
 	import { UIController } from '$lib/controllers/UIController.svelte';
 	import { SeatingController } from '$lib/controllers/SeatingController.svelte';
+	import { errorLogger } from '$lib/services/errorLogger';
 	import Header from '$lib/components/ui/Header.svelte';
+	import ServiceLayer from '$lib/components/ui/ServiceLayer.svelte';
 	import '../app.css';
 
 	let { children } = $props();
@@ -15,6 +17,25 @@
 	setContext('theme', theme);
 	setContext('ui', ui);
 	setContext('seating', seating);
+
+	onMount(() => {
+		const onRejection = (e: PromiseRejectionEvent) => {
+			errorLogger.logError(e.reason instanceof Error ? e.reason : new Error(String(e.reason)), {
+				component: 'unhandledRejection'
+			});
+		};
+		const onWindowError = (e: ErrorEvent) => {
+			if (e.message && e.message.includes('ResizeObserver loop')) return;
+			errorLogger.logError(e.error || e.message, { component: 'windowError' });
+		};
+		window.addEventListener('unhandledrejection', onRejection);
+		window.addEventListener('error', onWindowError);
+
+		return () => {
+			window.removeEventListener('unhandledrejection', onRejection);
+			window.removeEventListener('error', onWindowError);
+		};
+	});
 
 	$effect(() => {
 		theme.sync();
@@ -30,6 +51,7 @@
 	<main>
 		{@render children()}
 	</main>
+	<ServiceLayer />
 </div>
 
 <style>

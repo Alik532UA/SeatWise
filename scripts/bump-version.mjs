@@ -23,6 +23,9 @@ if (!existsSync(staticDir)) mkdirSync(staticDir, { recursive: true });
 if (!existsSync(configDir)) mkdirSync(configDir, { recursive: true });
 
 writeFileSync(staticVersionPath, `${JSON.stringify({ version: newVersion }, null, '\t')}\n`);
-writeFileSync(tsVersionPath, `export const APP_VERSION = '${newVersion}';\n`);
+writeFileSync(
+	tsVersionPath,
+	`export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '${newVersion}';\n`
+);
 
 console.log(`[bump-version] Version synchronized: ${newVersion}`);

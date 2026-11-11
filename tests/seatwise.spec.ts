@@ -298,4 +298,39 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 			path: 'C:/Users/alik5/.gemini/antigravity/brain/cd3f1297-ad13-488f-8ba7-2cd87385f02d/wide_screen_fullscreen.png'
 		});
 	});
+
+	test('service badge with data-testid="app-version-value" displays build version and copies diagnostic log', async ({
+		page,
+		context
+	}) => {
+		// Grant clipboard permissions
+		await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => {});
+
+		// Load page with ?debug=1 to activate service badge
+		await page.goto(`${BASE}/?debug=1`);
+
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// Verify service badge presence
+		const versionBadge = page.locator('[data-testid="app-version-value"]');
+		await expect(versionBadge).toBeVisible();
+
+		// Check version format (semver)
+		const versionText = await versionBadge.locator('.badge__version').textContent();
+		expect(versionText).toMatch(/^\d+\.\d+\.\d+/);
+
+		// Click to copy diagnostic log
+		await versionBadge.click();
+
+		// Check copied state (or fallback textarea)
+		const isCopied = await versionBadge.evaluate((el) => el.classList.contains('badge--copied'));
+		const fallbackTextarea = page.locator('[data-testid="service-badge-report-textarea"]');
+
+		// Either copied indicator or fallback textarea must be active
+		const textareaVisible = await fallbackTextarea.isVisible();
+		expect(isCopied || textareaVisible).toBe(true);
+	});
 });
