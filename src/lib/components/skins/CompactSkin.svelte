@@ -203,6 +203,9 @@
 		border-radius: 8px;
 		overflow: hidden;
 		transition: border-color 0.15s ease;
+		max-width: 1200px;
+		width: 100%;
+		box-sizing: border-box;
 	}
 
 	.names-summary {
@@ -403,8 +406,10 @@
 
 	.compact-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
 		gap: 0.75rem;
+		width: 100%;
+		box-sizing: border-box;
 	}
 
 	.mini-round {

@@ -46,10 +46,9 @@
 
 	main {
 		flex: 1;
-		padding: 1rem clamp(0.75rem, 3vw, 2rem);
-		max-width: 1400px;
+		padding: 1rem clamp(0.75rem, 2vw, 2.5rem);
 		width: 100%;
+		max-width: 100%;
 		box-sizing: border-box;
-		margin: 0 auto;
 	}
 </style>

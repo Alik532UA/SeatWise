@@ -155,12 +155,12 @@
 		flex-direction: column;
 		gap: 0.5rem;
 		background: var(--bg-card);
-		padding: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 2rem);
+		padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 2vw, 2rem);
 		border-radius: 12px;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 		border: 1px solid var(--border-color);
 		width: 100%;
-		max-width: 100%;
+		max-width: 1200px;
 		box-sizing: border-box;
 	}
 
@@ -353,8 +353,10 @@
 
 	.rounds-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-		gap: 2rem;
+		grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
+		gap: clamp(1rem, 1.5vw, 2rem);
+		width: 100%;
+		box-sizing: border-box;
 	}
 
 	.round-card {

@@ -256,4 +256,46 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 		const ukRoundsCount = await page.locator('.round-card').count();
 		expect(ukRoundsCount).toBe(initialRoundsCount);
 	});
+
+	test('fills full viewport width on wide screens and zoom out without side dead zones', async ({
+		page
+	}) => {
+		// Set wide viewport (simulating zoom-out or 2K/4K display)
+		await page.setViewportSize({ width: 2560, height: 1440 });
+		await page.goto(`${BASE}/`);
+
+		const closeWizardBtn = page.locator('.wizard-header .close-btn');
+		if (await closeWizardBtn.isVisible()) {
+			await closeWizardBtn.click();
+		}
+
+		// Calculate seating
+		await page.locator('.btn-primary').click();
+		await page.waitForTimeout(300);
+
+		// Check that main element utilizes available width beyond old 1400px restriction
+		const mainBox = await page.locator('main').boundingBox();
+		expect(mainBox).not.toBeNull();
+		if (mainBox) {
+			expect(mainBox.width).toBeGreaterThan(2000);
+		}
+
+		// Verify round grid generates multi-column fluid layout (more than 3 columns on wide screen)
+		const firstRound = page.locator('.round-card').nth(0);
+		const fourthRound = page.locator('.round-card').nth(3);
+
+		const firstBox = await firstRound.boundingBox();
+		const fourthBox = await fourthRound.boundingBox();
+
+		expect(firstBox).not.toBeNull();
+		expect(fourthBox).not.toBeNull();
+		// If 4th card is on the same row as 1st (multi-column fluid), its Y position is roughly the same
+		if (firstBox && fourthBox) {
+			expect(Math.abs(firstBox.y - fourthBox.y)).toBeLessThan(50);
+		}
+
+		await page.screenshot({
+			path: 'C:/Users/alik5/.gemini/antigravity/brain/cd3f1297-ad13-488f-8ba7-2cd87385f02d/wide_screen_fullscreen.png'
+		});
+	});
 });
