@@ -28,3 +28,5 @@ project.inlang/cache/
 # Test artifacts
 test-results/
 playwright-report/
+
+.docx

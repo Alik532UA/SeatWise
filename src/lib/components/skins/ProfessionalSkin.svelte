@@ -3,37 +3,56 @@
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { Sparkle, ArrowsCounterClockwise, Copy, Check, Target } from 'phosphor-svelte';
+	import NumberStepper from '$lib/components/ui/NumberStepper.svelte';
 
 	const seating = getContext<SeatingController>('seating');
 </script>
 
-<div class="skin-professional">
+<div class="skin-classic skin-professional">
 	<section class="config-panel">
 		<div class="input-group">
 			<label for="totalPeople">{m.total_people()}:</label>
-			<input type="number" id="totalPeople" bind:value={seating.totalPeople} min="2" />
+			<NumberStepper
+				bind:value={seating.totalPeople}
+				min={2}
+				max={200}
+				id="totalPeople"
+				ariaLabel={m.total_people()}
+			/>
 		</div>
 
 		<div class="input-group">
 			<label for="tableCount">{m.table_count()}:</label>
-			<input type="number" id="tableCount" bind:value={seating.tableCount} min="1" />
+			<NumberStepper
+				bind:value={seating.tableCount}
+				min={1}
+				max={50}
+				id="tableCount"
+				ariaLabel={m.table_count()}
+			/>
 		</div>
 
 		<div class="input-group">
 			<label for="tableCapacity">{m.table_capacity()}:</label>
-			<input type="number" id="tableCapacity" bind:value={seating.tableCapacity} min="2" />
+			<NumberStepper
+				bind:value={seating.tableCapacity}
+				min={2}
+				max={30}
+				id="tableCapacity"
+				ariaLabel={m.table_capacity()}
+			/>
 		</div>
 
 		<div class="actions">
 			<button
-				class="btn-primary"
+				class="btn-primary touch-target"
 				onclick={() => seating.calculate()}
 				disabled={seating.isCalculating}
 			>
 				<Sparkle size={17} weight="bold" />
 				<span>{seating.isCalculating ? m.calculating() : m.calculate_button()}</span>
 			</button>
-			<button class="btn-secondary" onclick={() => seating.reset()}>
+			<button class="btn-secondary touch-target" onclick={() => seating.reset()}>
 				<ArrowsCounterClockwise size={16} weight="bold" />
 				<span>{m.reset()}</span>
 			</button>
@@ -114,15 +133,18 @@
 	.config-panel {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1.5rem;
+		gap: 1.25rem;
 		background: var(--bg-card);
-		padding: 2rem;
+		padding: clamp(1rem, 3vw, 2rem);
 		border-radius: 12px;
 		box-shadow:
 			0 4px 6px -1px rgba(0, 0, 0, 0.1),
 			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		border: 1px solid var(--border-color);
 		align-items: flex-end;
+		width: 100%;
+		max-width: 100%;
+		box-sizing: border-box;
 	}
 
 	.names-panel {
@@ -130,14 +152,19 @@
 		flex-direction: column;
 		gap: 0.5rem;
 		background: var(--bg-card);
-		padding: 1.5rem 2rem;
+		padding: clamp(1rem, 3vw, 1.5rem) clamp(1rem, 3vw, 2rem);
 		border-radius: 12px;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 		border: 1px solid var(--border-color);
+		width: 100%;
+		max-width: 100%;
+		box-sizing: border-box;
 	}
 
 	textarea {
 		width: 100%;
+		max-width: 100%;
+		box-sizing: border-box;
 		padding: 0.75rem;
 		border: 1px solid var(--border-color);
 		border-radius: 8px;
@@ -152,8 +179,8 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
-		flex: 1;
-		min-width: 200px;
+		flex: 1 1 200px;
+		min-width: min(200px, 100%);
 	}
 
 	label {
@@ -162,18 +189,12 @@
 		color: var(--text-secondary);
 	}
 
-	input {
-		padding: 0.75rem;
-		border: 1px solid var(--border-color);
-		border-radius: 8px;
-		font-size: 1rem;
-		background-color: var(--bg-primary);
-		color: var(--text-primary);
-	}
-
 	.actions {
 		display: flex;
 		gap: 0.75rem;
+		flex: 1 1 280px;
+		min-width: min(280px, 100%);
+		flex-wrap: wrap;
 	}
 
 	.btn-primary,
@@ -182,15 +203,29 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		height: 42px;
+		height: 44px;
 		padding: 0 1.25rem;
-		font-size: 0.9rem;
+		font-size: 0.92rem;
 		font-weight: 600;
 		border-radius: 8px;
 		cursor: pointer;
 		transition: all 0.15s ease;
 		box-sizing: border-box;
 		white-space: nowrap;
+		flex: 1 1 auto;
+		min-width: 130px;
+	}
+
+	@media (max-width: 500px) {
+		.actions {
+			flex-direction: column;
+			width: 100%;
+		}
+
+		.btn-primary,
+		.btn-secondary {
+			width: 100%;
+		}
 	}
 
 	.btn-primary {

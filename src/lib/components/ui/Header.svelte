@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import type { ThemeController } from '$lib/controllers/ThemeController.svelte';
-	import type { UIController, UISkin } from '$lib/controllers/UIController.svelte';
+	import type { UIController } from '$lib/controllers/UIController.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { setLocale, getLocale, locales } from '$lib/paraglide/runtime';
-	import { Sparkle, ArrowSquareOut, Sun, Moon, SlidersHorizontal } from 'phosphor-svelte';
+	import { Sparkle, ArrowSquareOut, Sun, Moon, Compass } from 'phosphor-svelte';
 
 	const theme = getContext<ThemeController>('theme');
 	const ui = getContext<UIController>('ui');
@@ -21,6 +21,18 @@
 	</div>
 
 	<div class="controls">
+		<button
+			type="button"
+			class="wizard-open-btn touch-target"
+			onclick={() => ui.startOnboarding()}
+			title={m.step_restart_wizard()}
+			aria-label={m.step_restart_wizard()}
+			data-testid="restart-wizard-btn"
+		>
+			<Compass size={16} weight="bold" />
+			<span>{m.onboarding_title()}</span>
+		</button>
+
 		<a
 			href="https://alik532ua.github.io/DigitalWorkshop/"
 			target="_blank"
@@ -34,19 +46,45 @@
 			<ArrowSquareOut size={14} weight="bold" />
 		</a>
 
-		<div class="skin-select-box">
-			<SlidersHorizontal size={15} class="control-icon" weight="bold" />
-			<label for="skin-select" class="sr-only">{m.ui_variant?.() || 'Варіант UI'}</label>
-			<select
-				id="skin-select"
-				value={ui.skin}
-				onchange={(e) => ui.setSkin(e.currentTarget.value as UISkin)}
-				aria-label={m.ui_variant?.() || 'Варіант UI'}
+		<div
+			class="skin-select-box"
+			role="radiogroup"
+			aria-label={m.ui_variant?.() || 'Варіант UI'}
+			data-testid="skin-select-group"
+		>
+			<button
+				type="button"
+				class="skin-tab-btn"
+				class:active={ui.skin === 'classic' || (ui.skin as string) === 'professional'}
+				onclick={() => ui.setSkin('classic')}
+				aria-checked={ui.skin === 'classic' || (ui.skin as string) === 'professional'}
+				role="radio"
+				data-testid="skin-btn-classic"
 			>
-				<option value="professional">Professional</option>
-				<option value="compact">Compact</option>
-				<option value="visual">Visual</option>
-			</select>
+				{m.skin_classic?.() || 'Classic'}
+			</button>
+			<button
+				type="button"
+				class="skin-tab-btn"
+				class:active={ui.skin === 'compact'}
+				onclick={() => ui.setSkin('compact')}
+				aria-checked={ui.skin === 'compact'}
+				role="radio"
+				data-testid="skin-btn-compact"
+			>
+				{m.skin_compact?.() || 'Compact'}
+			</button>
+			<button
+				type="button"
+				class="skin-tab-btn"
+				class:active={ui.skin === 'visual'}
+				onclick={() => ui.setSkin('visual')}
+				aria-checked={ui.skin === 'visual'}
+				role="radio"
+				data-testid="skin-btn-visual"
+			>
+				{m.skin_visual?.() || 'Visual'}
+			</button>
 		</div>
 
 		<button
@@ -84,7 +122,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.85rem 2rem;
+		padding: 0.85rem clamp(0.75rem, 3vw, 2rem);
 		background-color: var(--bg-secondary);
 		border-bottom: 1px solid var(--border-color);
 		flex-wrap: wrap;
@@ -99,35 +137,49 @@
 		font-size: 1.35rem;
 		font-weight: 700;
 		color: var(--text-primary);
-		letter-spacing: -0.02em;
+		line-height: 1.2;
 	}
 
 	.subtitle {
-		margin: 0.2rem 0 0;
-		font-size: 0.82rem;
+		margin: 0.25rem 0 0;
+		font-size: 0.85rem;
 		color: var(--text-secondary);
+		line-height: 1.3;
 	}
 
 	.controls {
 		display: flex;
 		align-items: center;
-		gap: 0.6rem;
 		flex-wrap: wrap;
+		gap: 0.6rem;
 	}
 
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
+	/* Wizard launcher button */
+	.wizard-open-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		height: 38px;
+		padding: 0 0.85rem;
+		box-sizing: border-box;
+		background-color: var(--bg-card);
+		color: var(--accent-primary);
+		border: 1px solid var(--border-color);
+		font-weight: 600;
+		font-size: 0.82rem;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.15s ease;
 		white-space: nowrap;
-		border: 0;
 	}
 
-	/* 1. Order CTA Button */
+	.wizard-open-btn:hover {
+		border-color: var(--accent-primary);
+		background: rgba(37, 99, 235, 0.08);
+		transform: translateY(-1px);
+	}
+
+	/* CTA Button */
 	.order-cta-btn {
 		display: inline-flex;
 		align-items: center;
@@ -135,14 +187,13 @@
 		height: 38px;
 		padding: 0 0.95rem;
 		box-sizing: border-box;
-		background: linear-gradient(135deg, var(--accent-primary) 0%, #6366f1 100%);
+		background: linear-gradient(135deg, #2563eb, #3b82f6);
 		color: #ffffff !important;
 		font-weight: 600;
 		font-size: 0.82rem;
 		border-radius: 8px;
 		text-decoration: none;
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);
+		box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
 		transition:
 			transform 0.15s ease,
 			box-shadow 0.15s ease,
@@ -161,42 +212,43 @@
 		transform: translateY(0);
 	}
 
-	/* 2. Skin Selector */
+	/* 2. Skin Selector as Checkbox/Segmented Buttons */
 	.skin-select-box {
 		display: inline-flex;
 		align-items: center;
 		height: 38px;
 		box-sizing: border-box;
-		padding: 0 0.5rem 0 0.65rem;
+		padding: 2px;
 		background-color: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: 8px;
-		gap: 0.4rem;
-		color: var(--text-secondary);
-		transition:
-			border-color 0.15s ease,
-			background-color 0.2s;
+		gap: 2px;
 	}
 
-	.skin-select-box:focus-within {
-		border-color: var(--accent-primary);
-	}
-
-	select {
-		height: 100%;
-		border: none;
+	.skin-tab-btn {
 		background: transparent;
-		color: var(--text-primary);
-		font-size: 0.82rem;
-		font-weight: 500;
+		border: none;
+		height: 100%;
+		padding: 0 0.65rem;
+		border-radius: 6px;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--text-secondary);
 		cursor: pointer;
-		outline: none;
-		padding: 0 0.25rem;
+		transition: all 0.15s ease;
+		user-select: none;
+		white-space: nowrap;
 	}
 
-	select option {
-		background-color: var(--bg-card);
+	.skin-tab-btn:hover:not(.active) {
 		color: var(--text-primary);
+		background-color: var(--bg-secondary);
+	}
+
+	.skin-tab-btn.active {
+		background-color: var(--accent-primary);
+		color: #ffffff;
+		box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
 	}
 
 	/* 3. Theme Toggle */
@@ -209,12 +261,12 @@
 		box-sizing: border-box;
 		background-color: var(--bg-card);
 		border: 1px solid var(--border-color);
+		color: var(--text-primary);
 		border-radius: 8px;
 		cursor: pointer;
-		color: var(--text-primary);
 		transition:
 			border-color 0.15s ease,
-			background-color 0.2s,
+			color 0.15s ease,
 			transform 0.15s ease;
 	}
 
@@ -231,38 +283,34 @@
 	/* 4. Language Switcher */
 	.lang-switcher {
 		display: inline-flex;
-		align-items: center;
 		height: 38px;
 		box-sizing: border-box;
-		padding: 3px;
-		gap: 2px;
 		background-color: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: 8px;
-		transition:
-			border-color 0.15s ease,
-			background-color 0.2s;
+		padding: 2px;
+		gap: 2px;
 	}
 
 	.lang-btn {
+		background: transparent;
+		border: none;
+		color: var(--text-secondary);
+		font-size: 0.75rem;
+		font-weight: 700;
+		padding: 0 0.55rem;
+		border-radius: 6px;
+		cursor: pointer;
+		transition:
+			background-color 0.15s ease,
+			color 0.15s ease;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		height: 30px;
-		padding: 0 0.65rem;
-		border: none;
-		border-radius: 6px;
-		background: transparent;
-		cursor: pointer;
-		font-size: 0.78rem;
-		font-weight: 600;
-		color: var(--text-secondary);
-		transition: all 0.15s ease;
 	}
 
 	.lang-btn:hover:not(.active) {
 		color: var(--text-primary);
-		background-color: var(--bg-secondary);
 	}
 
 	.lang-btn.active {
@@ -272,11 +320,14 @@
 
 	@media (max-width: 768px) {
 		.main-header {
-			padding: 0.75rem 1rem;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.75rem;
 		}
 
-		.order-cta-btn span {
-			font-size: 0.78rem;
+		.controls {
+			width: 100%;
+			justify-content: flex-start;
 		}
 	}
 </style>

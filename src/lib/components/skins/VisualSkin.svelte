@@ -2,6 +2,7 @@
 	import { getContext } from 'svelte';
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
+	import NumberStepper from '$lib/components/ui/NumberStepper.svelte';
 	import {
 		Users,
 		Armchair,
@@ -21,34 +22,52 @@
 			<span class="icon"><Users size={24} weight="duotone" /></span>
 			<div class="info">
 				<span class="label">{m.total_people()}</span>
-				<input type="number" bind:value={seating.totalPeople} min="2" />
+				<NumberStepper
+					bind:value={seating.totalPeople}
+					min={2}
+					max={200}
+					id="visual-people"
+					ariaLabel={m.total_people()}
+				/>
 			</div>
 		</div>
 		<div class="stat-card">
 			<span class="icon"><Armchair size={24} weight="duotone" /></span>
 			<div class="info">
 				<span class="label">{m.table_count()}</span>
-				<input type="number" bind:value={seating.tableCount} min="1" />
+				<NumberStepper
+					bind:value={seating.tableCount}
+					min={1}
+					max={50}
+					id="visual-tables"
+					ariaLabel={m.table_count()}
+				/>
 			</div>
 		</div>
 		<div class="stat-card">
 			<span class="icon"><UsersFour size={24} weight="duotone" /></span>
 			<div class="info">
 				<span class="label">{m.table_capacity()}</span>
-				<input type="number" bind:value={seating.tableCapacity} min="2" />
+				<NumberStepper
+					bind:value={seating.tableCapacity}
+					min={2}
+					max={30}
+					id="visual-capacity"
+					ariaLabel={m.table_capacity()}
+				/>
 			</div>
 		</div>
 
 		<div class="main-actions">
 			<button
-				class="glow-button"
+				class="glow-button touch-target"
 				onclick={() => seating.calculate()}
 				disabled={seating.isCalculating}
 			>
 				<Sparkle size={18} weight="bold" />
 				<span>{seating.isCalculating ? m.calculating() : m.calculate_button()}</span>
 			</button>
-			<button class="btn-reset" onclick={() => seating.reset()}>
+			<button class="btn-reset touch-target" onclick={() => seating.reset()}>
 				<ArrowsCounterClockwise size={16} weight="bold" />
 				<span>{m.reset()}</span>
 			</button>
@@ -214,15 +233,6 @@
 		text-transform: uppercase;
 		font-weight: 800;
 		color: var(--text-secondary);
-	}
-
-	.stat-card input {
-		border: none;
-		background: transparent;
-		font-size: 1.2rem;
-		font-weight: 900;
-		color: var(--accent-primary);
-		width: 50px;
 	}
 
 	.main-actions {

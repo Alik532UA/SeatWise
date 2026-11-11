@@ -2,6 +2,7 @@
 	import { getContext } from 'svelte';
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
+	import NumberStepper from '$lib/components/ui/NumberStepper.svelte';
 	import { Sparkle, ArrowsCounterClockwise } from 'phosphor-svelte';
 
 	const seating = getContext<SeatingController>('seating');
@@ -11,22 +12,44 @@
 	<section class="config-bar">
 		<div class="field">
 			<span class="label">N:</span>
-			<input type="number" bind:value={seating.totalPeople} min="2" />
+			<NumberStepper
+				bind:value={seating.totalPeople}
+				min={2}
+				max={200}
+				id="compact-n"
+				ariaLabel="N"
+			/>
 		</div>
 		<div class="field">
 			<span class="label">T:</span>
-			<input type="number" bind:value={seating.tableCount} min="1" />
+			<NumberStepper
+				bind:value={seating.tableCount}
+				min={1}
+				max={50}
+				id="compact-t"
+				ariaLabel="T"
+			/>
 		</div>
 		<div class="field">
 			<span class="label">C:</span>
-			<input type="number" bind:value={seating.tableCapacity} min="2" />
+			<NumberStepper
+				bind:value={seating.tableCapacity}
+				min={2}
+				max={30}
+				id="compact-c"
+				ariaLabel="C"
+			/>
 		</div>
 		<div class="actions">
-			<button class="primary" onclick={() => seating.calculate()} disabled={seating.isCalculating}>
+			<button
+				class="primary touch-target"
+				onclick={() => seating.calculate()}
+				disabled={seating.isCalculating}
+			>
 				<Sparkle size={15} weight="bold" />
 				<span>{seating.isCalculating ? m.calculating() : m.calculate_button()}</span>
 			</button>
-			<button class="secondary" onclick={() => seating.reset()}>
+			<button class="secondary touch-target" onclick={() => seating.reset()}>
 				<ArrowsCounterClockwise size={15} weight="bold" />
 				<span>{m.reset()}</span>
 			</button>
@@ -79,24 +102,6 @@
 	.field .label {
 		font-weight: 700;
 		color: var(--text-secondary);
-	}
-
-	input {
-		width: 60px;
-		height: 34px;
-		box-sizing: border-box;
-		background: var(--bg-primary);
-		color: var(--text-primary);
-		border: 1px solid var(--border-color);
-		border-radius: 6px;
-		padding: 0 0.5rem;
-		font-family: inherit;
-		font-size: 0.85rem;
-		outline: none;
-	}
-
-	input:focus {
-		border-color: var(--accent-primary);
 	}
 
 	.actions {

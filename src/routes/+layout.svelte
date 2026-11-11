@@ -4,7 +4,6 @@
 	import { UIController } from '$lib/controllers/UIController.svelte';
 	import { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
-	import Footer from '$lib/components/ui/Footer.svelte';
 	import '../app.css';
 
 	let { children } = $props();
@@ -27,7 +26,6 @@
 	<main>
 		{@render children()}
 	</main>
-	<Footer />
 </div>
 
 <style>
@@ -44,7 +42,7 @@
 
 	main {
 		flex: 1;
-		padding: 1rem 2rem;
+		padding: 1rem clamp(0.75rem, 3vw, 2rem);
 		max-width: 1400px;
 		width: 100%;
 		box-sizing: border-box;
