@@ -22,7 +22,11 @@
 	<div class="controls">
 		<div class="control-group">
 			<label for="skin-select">{m.ui_variant?.() || 'Варіант UI'}:</label>
-			<select id="skin-select" value={ui.skin} onchange={(e) => ui.setSkin(e.currentTarget.value as UISkin)}>
+			<select
+				id="skin-select"
+				value={ui.skin}
+				onchange={(e) => ui.setSkin(e.currentTarget.value as UISkin)}
+			>
 				<option value="professional">Professional</option>
 				<option value="compact">Compact</option>
 				<option value="visual">Visual</option>
@@ -41,8 +45,8 @@
 
 		<div class="control-group lang-switcher">
 			{#each locales as l}
-				<button 
-					class="lang-btn" 
+				<button
+					class="lang-btn"
 					class:active={getLocale() === l}
 					onclick={() => handleLocaleChange(l)}
 				>

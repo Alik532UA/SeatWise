@@ -24,7 +24,11 @@
 		</div>
 
 		<div class="actions">
-			<button class="btn-primary" onclick={() => seating.calculate()} disabled={seating.isCalculating}>
+			<button
+				class="btn-primary"
+				onclick={() => seating.calculate()}
+				disabled={seating.isCalculating}
+			>
 				{seating.isCalculating ? m.calculating() : m.calculate_button()}
 			</button>
 			<button class="btn-secondary" onclick={() => seating.reset()}>
@@ -35,9 +39,9 @@
 
 	<section class="names-panel">
 		<label for="namesInput">{m.participants_list()}:</label>
-		<textarea 
-			id="namesInput" 
-			bind:value={seating.namesInput} 
+		<textarea
+			id="namesInput"
+			bind:value={seating.namesInput}
 			placeholder={m.participants_placeholder()}
 			rows="5"
 		></textarea>
@@ -53,9 +57,9 @@
 				<h2>{m.rounds_needed()}: <span class="highlight">{seating.rounds.length}</span></h2>
 				<p>{m.perfect_goal({ count: seating.totalPeople - 1 })}</p>
 			</div>
-			<button 
-				class="btn-copy" 
-				class:copied={seating.isCopied} 
+			<button
+				class="btn-copy"
+				class:copied={seating.isCopied}
 				onclick={() => seating.copyToClipboard()}
 			>
 				{seating.isCopied ? m.copied() : m.copy_button()}
@@ -102,7 +106,9 @@
 		background: var(--bg-card);
 		padding: 2rem;
 		border-radius: 12px;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		box-shadow:
+			0 4px 6px -1px rgba(0, 0, 0, 0.1),
+			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		border: 1px solid var(--border-color);
 		align-items: flex-end;
 	}
@@ -114,7 +120,7 @@
 		background: var(--bg-card);
 		padding: 1.5rem 2rem;
 		border-radius: 12px;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 		border: 1px solid var(--border-color);
 	}
 
@@ -254,7 +260,7 @@
 		background: var(--bg-card);
 		border-radius: 12px;
 		padding: 1.5rem;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 		border: 1px solid var(--border-color);
 	}
 
@@ -311,14 +317,14 @@
 		font-size: 0.9rem;
 		font-weight: 700;
 		transition: all 0.2s ease;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 	}
 
 	.person-avatar:hover {
 		transform: scale(1.15);
 		background: var(--accent-primary);
 		color: white;
-		box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 		cursor: default;
 	}
 </style>

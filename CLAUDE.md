@@ -10,4 +10,3 @@
   - `npm run test:e2e`: Playwright E2E tests.
   - `npm run lint`: Prettier & ESLint checks.
   - `npm run build`: Production build.
-

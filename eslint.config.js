@@ -6,14 +6,7 @@ import prettierConfig from 'eslint-config-prettier';
 
 export default [
 	{
-		ignores: [
-			'build/',
-			'.svelte-kit/',
-			'dist/',
-			'node_modules/',
-			'static/',
-			'src/lib/paraglide/'
-		]
+		ignores: ['build/', '.svelte-kit/', 'dist/', 'node_modules/', 'static/', 'src/lib/paraglide/']
 	},
 	{
 		files: ['*.js', '*.mjs', 'scripts/**/*.mjs'],
@@ -65,4 +58,3 @@ export default [
 	},
 	prettierConfig
 ];
-

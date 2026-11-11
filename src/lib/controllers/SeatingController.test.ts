@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { SeatingController } from './SeatingController.svelte';
 
 describe('SeatingController (Runes State & Seating Logic)', () => {
@@ -54,4 +54,3 @@ describe('SeatingController (Runes State & Seating Logic)', () => {
 		expect(controller.rounds).toEqual([]);
 	});
 });
-

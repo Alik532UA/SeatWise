@@ -55,10 +55,11 @@ const critical = vulnerabilities.critical || 0;
 const high = vulnerabilities.high || 0;
 
 if (critical > 0 || high > 0) {
-	console.error(`❌ Security audit failed: found ${critical} critical and ${high} high vulnerabilities.`);
+	console.error(
+		`❌ Security audit failed: found ${critical} critical and ${high} high vulnerabilities.`
+	);
 	process.exit(1);
 } else {
 	console.log('✓ Security audit passed: no high or critical vulnerabilities found.');
 	process.exit(0);
 }
-

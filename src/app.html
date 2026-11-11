@@ -4,10 +4,7 @@
 	<head>
 		<meta charset="utf-8" />
 
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1"
-		/>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 		<meta name="text-scale" content="scale" />
 		%sveltekit.head%
@@ -15,7 +12,7 @@
 
 	<body data-sveltekit-preload-data="hover">
 		<script>
-			(function() {
+			(function () {
 				const PREFIX = 'seatwise_';
 				const saved = localStorage.getItem(PREFIX + 'theme');
 				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

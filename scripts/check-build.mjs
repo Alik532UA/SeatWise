@@ -7,10 +7,7 @@ const __dirname = dirname(__filename);
 const rootDir = resolve(__dirname, '..');
 const buildDir = resolve(rootDir, 'build');
 
-const requiredFiles = [
-	'index.html',
-	'404.html'
-];
+const requiredFiles = ['index.html', '404.html'];
 
 let errors = 0;
 
@@ -31,4 +28,3 @@ if (errors > 0) {
 	console.log('✓ All build output files verified successfully.');
 	process.exit(0);
 }
-

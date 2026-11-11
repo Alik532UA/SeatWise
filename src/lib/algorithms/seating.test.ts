@@ -6,7 +6,7 @@ describe('Seating Algorithms', () => {
 		it('should multiply numbers in GF(8) correctly', () => {
 			expect(multiply(1, 1, 8)).toBe(1);
 			expect(multiply(2, 2, 8)).toBe(4);
-			expect(multiply(4, 2, 8)).toBe(3); 
+			expect(multiply(4, 2, 8)).toBe(3);
 			expect(multiply(7, 3, 8)).toBe(2);
 		});
 
@@ -25,7 +25,7 @@ describe('Seating Algorithms', () => {
 
 		it('should not have any duplicate people in a single round (GF5)', () => {
 			const plan = generatePerfectPlane(5);
-			plan.forEach(round => {
+			plan.forEach((round) => {
 				const people = round.flat();
 				const uniquePeople = new Set(people);
 				expect(uniquePeople.size).toBe(25);
@@ -36,8 +36,8 @@ describe('Seating Algorithms', () => {
 			const plan = generatePerfectPlane(5);
 			const meetings = new Set<string>();
 
-			plan.forEach(round => {
-				round.forEach(table => {
+			plan.forEach((round) => {
+				round.forEach((table) => {
 					for (let i = 0; i < table.length; i++) {
 						for (let j = i + 1; j < table.length; j++) {
 							const p1 = Math.min(table[i], table[j]);
@@ -54,11 +54,13 @@ describe('Seating Algorithms', () => {
 
 	describe('generateUntilFullyConnected', () => {
 		it('should ensure everyone meets everyone for small N', () => {
-			const N = 6, T = 2, C = 3;
+			const N = 6,
+				T = 2,
+				C = 3;
 			const plan = generateUntilFullyConnected(N, T, C);
 			const meetings = new Set<string>();
-			plan.forEach(round => {
-				round.forEach(table => {
+			plan.forEach((round) => {
+				round.forEach((table) => {
 					for (let i = 0; i < table.length; i++) {
 						for (let j = i + 1; j < table.length; j++) {
 							const p1 = Math.min(table[i], table[j]);

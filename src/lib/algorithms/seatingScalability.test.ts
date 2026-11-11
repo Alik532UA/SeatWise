@@ -62,4 +62,3 @@ describe('Seating Algorithms Scalability & Performance', () => {
 		}
 	});
 });
-

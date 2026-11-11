@@ -53,4 +53,3 @@ npm run test:e2e
 # 5. Повна перевірка збірки
 npm run build && npm run check:build
 ```
-

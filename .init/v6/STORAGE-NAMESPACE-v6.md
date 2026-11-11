@@ -10,6 +10,7 @@
 ## Коли потрібен цей патерн
 
 Цей документ **обов'язковий** для проєктів, де:
+
 - Кілька застосунків розгорнуті на **одному домені** (наприклад, `username.github.io/app1`, `username.github.io/app2`)
 - Різні середовища (staging, production) на одному домені
 
@@ -19,22 +20,22 @@
 
 Браузер визначає origin як `protocol + host + port`. Отже, `localStorage`, `sessionStorage`, `cookies` та `Cache API` **спільні** для всіх застосунків на одному origin.
 
-| Ризик | Приклад |
-|-------|---------|
-| Перезапис даних | Ключ `theme` в App1 перезаписує `theme` в App2 |
-| Знищення даних | `localStorage.clear()` в одному — видаляє дані **всіх** |
-| Конфлікт кешів | Однакова назва кешу в Cache API у різних Service Workers |
+| Ризик           | Приклад                                                  |
+| --------------- | -------------------------------------------------------- |
+| Перезапис даних | Ключ `theme` в App1 перезаписує `theme` в App2           |
+| Знищення даних  | `localStorage.clear()` в одному — видаляє дані **всіх**  |
+| Конфлікт кешів  | Однакова назва кешу в Cache API у різних Service Workers |
 
 ---
 
 ## 🚫 ЖОРСТКІ ОБМЕЖЕННЯ (ANTI-PATTERNS)
 
-| Рівень | Заборона | Правильна альтернатива |
-|--------|----------|----------------------|
-| **CRITICAL** | `localStorage.getItem('key')` поза StorageService | `storage.get('key')` |
-| **CRITICAL** | `localStorage.setItem('key', val)` поза StorageService | `storage.set('key', val)` |
-| **CRITICAL** | `localStorage.clear()` | `storage.clear()` (видаляє лише ключі з префіксом) |
-| **HIGH** | Скорочені префікси (`ms_`, `hp_`) | Повна назва: `mindstep_`, `hotpaste_` |
+| Рівень       | Заборона                                               | Правильна альтернатива                             |
+| ------------ | ------------------------------------------------------ | -------------------------------------------------- |
+| **CRITICAL** | `localStorage.getItem('key')` поза StorageService      | `storage.get('key')`                               |
+| **CRITICAL** | `localStorage.setItem('key', val)` поза StorageService | `storage.set('key', val)`                          |
+| **CRITICAL** | `localStorage.clear()`                                 | `storage.clear()` (видаляє лише ключі з префіксом) |
+| **HIGH**     | Скорочені префікси (`ms_`, `hp_`)                      | Повна назва: `mindstep_`, `hotpaste_`              |
 
 ---
 
@@ -49,32 +50,35 @@
 const PREFIX = 'myapp_'; // Повна назва проєкту
 
 export const storage = {
-    get(key: string): string | null {
-        return localStorage.getItem(PREFIX + key);
-    },
-    set(key: string, value: string): void {
-        localStorage.setItem(PREFIX + key, value);
-    },
-    remove(key: string): void {
-        localStorage.removeItem(PREFIX + key);
-    },
-    clear(): void {
-        const keysToRemove: string[] = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key?.startsWith(PREFIX)) keysToRemove.push(key);
-        }
-        keysToRemove.forEach((k) => localStorage.removeItem(k));
-    },
-    getJSON<T>(key: string): T | null {
-        const raw = storage.get(key);
-        if (raw === null) return null;
-        try { return JSON.parse(raw) as T; }
-        catch { return null; }
-    },
-    setJSON(key: string, value: unknown): void {
-        storage.set(key, JSON.stringify(value));
-    }
+	get(key: string): string | null {
+		return localStorage.getItem(PREFIX + key);
+	},
+	set(key: string, value: string): void {
+		localStorage.setItem(PREFIX + key, value);
+	},
+	remove(key: string): void {
+		localStorage.removeItem(PREFIX + key);
+	},
+	clear(): void {
+		const keysToRemove: string[] = [];
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (key?.startsWith(PREFIX)) keysToRemove.push(key);
+		}
+		keysToRemove.forEach((k) => localStorage.removeItem(k));
+	},
+	getJSON<T>(key: string): T | null {
+		const raw = storage.get(key);
+		if (raw === null) return null;
+		try {
+			return JSON.parse(raw) as T;
+		} catch {
+			return null;
+		}
+	},
+	setJSON(key: string, value: unknown): void {
+		storage.set(key, JSON.stringify(value));
+	}
 };
 ```
 
@@ -89,17 +93,23 @@ export const storage = {
 const PREFIX = 'myapp_';
 
 export const sessionStore = {
-    get(key: string): string | null { return sessionStorage.getItem(PREFIX + key); },
-    set(key: string, value: string): void { sessionStorage.setItem(PREFIX + key, value); },
-    remove(key: string): void { sessionStorage.removeItem(PREFIX + key); },
-    clear(): void {
-        const keysToRemove: string[] = [];
-        for (let i = 0; i < sessionStorage.length; i++) {
-            const key = sessionStorage.key(i);
-            if (key?.startsWith(PREFIX)) keysToRemove.push(key);
-        }
-        keysToRemove.forEach((k) => sessionStorage.removeItem(k));
-    }
+	get(key: string): string | null {
+		return sessionStorage.getItem(PREFIX + key);
+	},
+	set(key: string, value: string): void {
+		sessionStorage.setItem(PREFIX + key, value);
+	},
+	remove(key: string): void {
+		sessionStorage.removeItem(PREFIX + key);
+	},
+	clear(): void {
+		const keysToRemove: string[] = [];
+		for (let i = 0; i < sessionStorage.length; i++) {
+			const key = sessionStorage.key(i);
+			if (key?.startsWith(PREFIX)) keysToRemove.push(key);
+		}
+		keysToRemove.forEach((k) => sessionStorage.removeItem(k));
+	}
 };
 ```
 
@@ -116,16 +126,16 @@ export const sessionStore = {
 const MIGRATION_KEY = PREFIX + '__migrated';
 
 export function migrateStorage(mapping: Record<string, string>): void {
-    if (localStorage.getItem(MIGRATION_KEY)) return;
+	if (localStorage.getItem(MIGRATION_KEY)) return;
 
-    for (const [oldKey, newKey] of Object.entries(mapping)) {
-        const value = localStorage.getItem(oldKey);
-        if (value !== null && localStorage.getItem(PREFIX + newKey) === null) {
-            localStorage.setItem(PREFIX + newKey, value);
-            localStorage.removeItem(oldKey);
-        }
-    }
-    localStorage.setItem(MIGRATION_KEY, 'true');
+	for (const [oldKey, newKey] of Object.entries(mapping)) {
+		const value = localStorage.getItem(oldKey);
+		if (value !== null && localStorage.getItem(PREFIX + newKey) === null) {
+			localStorage.setItem(PREFIX + newKey, value);
+			localStorage.removeItem(oldKey);
+		}
+	}
+	localStorage.setItem(MIGRATION_KEY, 'true');
 }
 ```
 
@@ -135,17 +145,20 @@ export function migrateStorage(mapping: Record<string, string>): void {
 
 - [ ] Назви кешів з префіксом проєкту: `const CACHE_NAME = 'myapp_cache_v1'`.
 - [ ] У `activate` SW видаляє лише свої кеші:
+
 ```javascript
 self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((names) =>
-            Promise.all(
-                names
-                    .filter((name) => name.startsWith('myapp_') && name !== CACHE_NAME)
-                    .map((name) => caches.delete(name))
-            )
-        )
-    );
+	event.waitUntil(
+		caches
+			.keys()
+			.then((names) =>
+				Promise.all(
+					names
+						.filter((name) => name.startsWith('myapp_') && name !== CACHE_NAME)
+						.map((name) => caches.delete(name))
+				)
+			)
+	);
 });
 ```
 
@@ -159,14 +172,14 @@ self.addEventListener('activate', (event) => {
 
 ## Довідка: Ізоляція за типом сховища
 
-| Технологія | Ізольовано за path? | Рішення |
-|------------|---------------------|---------|
-| **localStorage** | ❌ Ні | StorageService з префіксом |
-| **sessionStorage** | ❌ Ні (лише по вкладці) | SessionStore з префіксом |
-| **Cookies** | ✅ Так (через `path=`) | Вказувати `path=/app/` |
-| **Cache API** | ❌ Ні | Префікс у назві кешу |
-| **IndexedDB** | ❌ Ні | Префікс у назві бази |
-| **Service Worker** | ✅ Так (scope) | Вже ізольовано |
+| Технологія         | Ізольовано за path?     | Рішення                    |
+| ------------------ | ----------------------- | -------------------------- |
+| **localStorage**   | ❌ Ні                   | StorageService з префіксом |
+| **sessionStorage** | ❌ Ні (лише по вкладці) | SessionStore з префіксом   |
+| **Cookies**        | ✅ Так (через `path=`)  | Вказувати `path=/app/`     |
+| **Cache API**      | ❌ Ні                   | Префікс у назві кешу       |
+| **IndexedDB**      | ❌ Ні                   | Префікс у назві бази       |
+| **Service Worker** | ✅ Так (scope)          | Вже ізольовано             |
 
 ---
 
@@ -177,6 +190,7 @@ self.addEventListener('activate', (event) => {
 ### A. DI-інтерфейс `StorageProvider`
 
 **Коли застосовувати:**
+
 - Складний state-management із бізнес-логікою, що залежить від storage (наприклад, `playlistStore`, `settingsService`).
 - Потрібно покривати цю логіку юніт-тестами без зачіпання реального `localStorage`.
 - Планується підміна імплементації (IndexedDB, віддалений KV-store, in-memory для тестів).
@@ -186,21 +200,23 @@ self.addEventListener('activate', (event) => {
 ```typescript
 // src/lib/services/storage/storageProvider.ts
 export interface StorageProvider {
-    getItem(key: string): string | null;
-    setItem(key: string, value: string): void;
-    removeItem(key: string): void;
-    getJson<T>(key: string): T | null;
-    setJson(key: string, value: unknown): void;
-    clear(): void;
+	getItem(key: string): string | null;
+	setItem(key: string, value: string): void;
+	removeItem(key: string): void;
+	getJson<T>(key: string): T | null;
+	setJson(key: string, value: unknown): void;
+	clear(): void;
 }
 
 export class LocalStorageProvider implements StorageProvider {
-    constructor(private readonly prefix: string) {}
-    // … реалізація з префіксом і browser-guard
+	constructor(private readonly prefix: string) {}
+	// … реалізація з префіксом і browser-guard
 }
 
 // У тестах:
-export class MemoryStorageProvider implements StorageProvider { /* in-memory */ }
+export class MemoryStorageProvider implements StorageProvider {
+	/* in-memory */
+}
 ```
 
 Реальний приклад: `Slovko-2026-04-28/src/lib/services/storage/storageProvider.ts`.
@@ -211,4 +227,3 @@ export class MemoryStorageProvider implements StorageProvider { /* in-memory */ 
 
 - [ ] Тести перевіряють: префіксацію всіх ключів, ізольований `clear()`, JSON serialize/parse, поведінку без `window` (SSR).
 - Реальний приклад: `HotPaste-2026-04-28/src/lib/services/storage.test.ts`.
-

@@ -26,4 +26,3 @@ writeFileSync(staticVersionPath, `${JSON.stringify({ version: newVersion }, null
 writeFileSync(tsVersionPath, `export const APP_VERSION = '${newVersion}';\n`);
 
 console.log(`[bump-version] Version synchronized: ${newVersion}`);
-

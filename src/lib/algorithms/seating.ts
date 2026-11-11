@@ -53,9 +53,9 @@ export function generatePerfectPlane(p: number): SeatingPlan {
 				if (p === 8) {
 					finalK = y ^ multiply(m, x, p);
 				} else {
-					finalK = (y + (m * x)) % p;
+					finalK = (y + m * x) % p;
 				}
-				
+
 				rSlope[finalK].push(x * p + y + 1);
 			}
 		}
@@ -79,11 +79,11 @@ export function generatePerfect64(): SeatingPlan {
 export function generateUntilFullyConnected(N: number, T: number, C: number): SeatingPlan {
 	let bestRounds: SeatingPlan = [];
 	const totalPairsNeeded = (N * (N - 1)) / 2;
-	const MAX_ROUNDS_SAFETY = 40; 
+	const MAX_ROUNDS_SAFETY = 40;
 
 	// ОПТИМІЗАЦІЯ ШВИДКОСТІ: Якщо людей багато, зменшуємо кількість глобальних спроб,
 	// оскільки локальний пошук Hill Climbing і так чудово оптимізує граф за один прохід.
-	const ATTEMPTS = N > 50 ? 5 : 200; 
+	const ATTEMPTS = N > 50 ? 5 : 200;
 
 	for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
 		const pairs = Array.from({ length: N + 1 }, () => Array(N + 1).fill(false));
@@ -93,7 +93,7 @@ export function generateUntilFullyConnected(N: number, T: number, C: number): Se
 		while (coveredPairs < totalPairsNeeded && currentRounds.length < MAX_ROUNDS_SAFETY) {
 			const tables: number[][] = Array.from({ length: T }, () => []);
 			const available = Array.from({ length: N }, (_, i) => i + 1);
-			
+
 			available.sort(() => Math.random() - 0.5);
 
 			const activeTablesCount = Math.ceil(N / C);
@@ -143,7 +143,7 @@ export function generateUntilFullyConnected(N: number, T: number, C: number): Se
 			// Крок 2: ОПТИМІЗАЦІЯ Hill Climbing (Локальний пошук)
 			let improved = true;
 			let swapIterations = 0;
-			
+
 			// Запобіжник swapIterations < 50 не дає алгоритму зациклюватися на великих N
 			while (improved && swapIterations < 50) {
 				improved = false;

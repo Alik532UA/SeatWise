@@ -23,4 +23,3 @@ describe('Content Security Policy Script Integrity (CSP-v10)', () => {
 		expect(html).not.toMatch(/href\s*=\s*['"]javascript:/i);
 	});
 });
-

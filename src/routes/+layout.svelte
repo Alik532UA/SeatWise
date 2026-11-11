@@ -33,7 +33,9 @@
 		min-height: 100vh;
 		background-color: var(--bg-primary);
 		color: var(--text-primary);
-		transition: background-color 0.2s, color 0.2s;
+		transition:
+			background-color 0.2s,
+			color 0.2s;
 	}
 
 	main {

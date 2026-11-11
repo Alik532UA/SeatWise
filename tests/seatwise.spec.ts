@@ -44,17 +44,16 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 		// Switch to Compact
 		await skinSelect.selectOption('compact');
 		await page.waitForTimeout(100);
-		await expect(page.locator('.compact-skin, .skin-container')).toBeVisible();
+		await expect(page.locator('.skin-compact')).toBeVisible();
 
 		// Switch to Visual
 		await skinSelect.selectOption('visual');
 		await page.waitForTimeout(100);
-		await expect(page.locator('.visual-skin, .skin-container')).toBeVisible();
+		await expect(page.locator('.skin-visual')).toBeVisible();
 
 		// Switch back to Professional
 		await skinSelect.selectOption('professional');
 		await page.waitForTimeout(100);
-		await expect(page.locator('.professional-skin, .skin-container')).toBeVisible();
+		await expect(page.locator('.skin-professional')).toBeVisible();
 	});
 });
-
