@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as m from '$lib/paraglide/messages';
-	import { Sparkles, ExternalLink } from '@lucide/svelte';
+	import { Sparkle, ArrowSquareOut } from 'phosphor-svelte';
 </script>
 
 <footer class="main-footer" data-testid="main-footer">
@@ -20,9 +20,9 @@
 				data-testid="footer-order-cta-btn"
 				title={m.order_cta()}
 			>
-				<Sparkles size={16} aria-hidden="true" />
+				<Sparkle size={16} weight="bold" aria-hidden="true" />
 				<span>{m.order_cta()}</span>
-				<ExternalLink size={14} aria-hidden="true" />
+				<ArrowSquareOut size={14} weight="bold" aria-hidden="true" />
 			</a>
 		</div>
 	</div>
@@ -70,19 +70,21 @@
 	.footer-order-btn {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.45rem 1rem;
-		min-height: 40px;
+		gap: 0.45rem;
+		height: 38px;
+		padding: 0 1rem;
 		box-sizing: border-box;
-		background-color: var(--bg-primary);
+		background-color: var(--bg-card);
 		color: var(--text-primary);
 		border: 1px solid var(--border-color);
 		font-weight: 600;
-		font-size: 0.85rem;
-		border-radius: 6px;
+		font-size: 0.82rem;
+		border-radius: 8px;
 		text-decoration: none;
 		transition:
-			all 0.2s ease,
+			border-color 0.15s ease,
+			color 0.15s ease,
+			box-shadow 0.15s ease,
 			transform 0.15s ease;
 		white-space: nowrap;
 	}
@@ -91,7 +93,11 @@
 		color: var(--accent-primary);
 		border-color: var(--accent-primary);
 		transform: translateY(-1px);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+	}
+
+	.footer-order-btn:active {
+		transform: translateY(0);
 	}
 
 	@media (max-width: 768px) {

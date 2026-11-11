@@ -2,6 +2,7 @@
 	import { getContext } from 'svelte';
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
+	import { Sparkle, ArrowsCounterClockwise, Copy, Check, Target } from 'phosphor-svelte';
 
 	const seating = getContext<SeatingController>('seating');
 </script>
@@ -29,10 +30,12 @@
 				onclick={() => seating.calculate()}
 				disabled={seating.isCalculating}
 			>
-				{seating.isCalculating ? m.calculating() : m.calculate_button()}
+				<Sparkle size={17} weight="bold" />
+				<span>{seating.isCalculating ? m.calculating() : m.calculate_button()}</span>
 			</button>
 			<button class="btn-secondary" onclick={() => seating.reset()}>
-				{m.reset()}
+				<ArrowsCounterClockwise size={16} weight="bold" />
+				<span>{m.reset()}</span>
 			</button>
 		</div>
 	</section>
@@ -55,14 +58,23 @@
 		<div class="results-header">
 			<div class="results-summary">
 				<h2>{m.rounds_needed()}: <span class="highlight">{seating.rounds.length}</span></h2>
-				<p>{m.perfect_goal({ count: seating.totalPeople - 1 })}</p>
+				<div class="goal-message">
+					<Target size={18} weight="duotone" class="goal-icon" />
+					<p>{m.perfect_goal({ count: seating.totalPeople - 1 })}</p>
+				</div>
 			</div>
 			<button
 				class="btn-copy"
 				class:copied={seating.isCopied}
 				onclick={() => seating.copyToClipboard()}
 			>
-				{seating.isCopied ? m.copied() : m.copy_button()}
+				{#if seating.isCopied}
+					<Check size={16} weight="bold" />
+					<span>{m.copied()}</span>
+				{:else}
+					<Copy size={16} weight="bold" />
+					<span>{m.copy_button()}</span>
+				{/if}
 			</button>
 		</div>
 
@@ -164,30 +176,52 @@
 		gap: 0.75rem;
 	}
 
-	button {
-		padding: 0.75rem 1.5rem;
-		font-size: 1rem;
+	.btn-primary,
+	.btn-secondary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		height: 42px;
+		padding: 0 1.25rem;
+		font-size: 0.9rem;
 		font-weight: 600;
 		border-radius: 8px;
 		cursor: pointer;
-		transition: all 0.2s;
-		border: none;
-		height: 48px;
+		transition: all 0.15s ease;
+		box-sizing: border-box;
+		white-space: nowrap;
 	}
 
 	.btn-primary {
 		background-color: var(--accent-primary);
-		color: white;
+		color: #ffffff;
+		border: 1px solid transparent;
+		box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);
 	}
 
 	.btn-primary:hover:not(:disabled) {
 		background-color: var(--accent-hover);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 	}
 
 	.btn-secondary {
-		background-color: var(--bg-secondary);
+		background-color: var(--bg-card);
 		color: var(--text-primary);
 		border: 1px solid var(--border-color);
+	}
+
+	.btn-secondary:hover:not(:disabled) {
+		border-color: var(--accent-primary);
+		color: var(--accent-primary);
+		transform: translateY(-1px);
+	}
+
+	.btn-primary:active,
+	.btn-secondary:active,
+	.btn-copy:active {
+		transform: translateY(0);
 	}
 
 	button:disabled {
@@ -211,7 +245,8 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		gap: 1rem;
+		flex-wrap: wrap;
+		gap: 1.5rem;
 	}
 
 	.results-summary {
@@ -222,23 +257,51 @@
 		border-left: 6px solid var(--success-border);
 	}
 
+	.goal-message {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+		margin-top: 0.35rem;
+	}
+
+	.goal-message :global(.goal-icon) {
+		flex-shrink: 0;
+		color: var(--accent-primary);
+		margin-top: 2px;
+	}
+
+	.goal-message p {
+		margin: 0;
+		font-size: 0.9rem;
+		line-height: 1.4;
+	}
+
 	.btn-copy {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.45rem;
+		height: 38px;
+		padding: 0 1.15rem;
 		background-color: var(--accent-primary);
-		color: white;
-		padding: 0.75rem 1.5rem;
+		color: #ffffff;
+		border: none;
 		border-radius: 8px;
+		font-size: 0.85rem;
 		font-weight: 600;
-		transition: all 0.3s ease;
+		cursor: pointer;
+		transition: all 0.15s ease;
 		white-space: nowrap;
 	}
 
 	.btn-copy:hover {
 		background-color: var(--accent-hover);
-		transform: translateY(-2px);
+		transform: translateY(-1px);
+		box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
 	}
 
 	.btn-copy.copied {
-		background-color: var(--success-border);
+		background-color: #16a34a;
 	}
 
 	.results-summary h2 {

@@ -2,6 +2,15 @@
 	import { getContext } from 'svelte';
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
+	import {
+		Users,
+		Armchair,
+		UsersFour,
+		Sparkle,
+		ArrowsCounterClockwise,
+		Copy,
+		Check
+	} from 'phosphor-svelte';
 
 	const seating = getContext<SeatingController>('seating');
 </script>
@@ -9,21 +18,21 @@
 <div class="skin-visual">
 	<div class="control-center">
 		<div class="stat-card">
-			<span class="icon">👥</span>
+			<span class="icon"><Users size={24} weight="duotone" /></span>
 			<div class="info">
 				<span class="label">{m.total_people()}</span>
 				<input type="number" bind:value={seating.totalPeople} min="2" />
 			</div>
 		</div>
 		<div class="stat-card">
-			<span class="icon">🪑</span>
+			<span class="icon"><Armchair size={24} weight="duotone" /></span>
 			<div class="info">
 				<span class="label">{m.table_count()}</span>
 				<input type="number" bind:value={seating.tableCount} min="1" />
 			</div>
 		</div>
 		<div class="stat-card">
-			<span class="icon">🍱</span>
+			<span class="icon"><UsersFour size={24} weight="duotone" /></span>
 			<div class="info">
 				<span class="label">{m.table_capacity()}</span>
 				<input type="number" bind:value={seating.tableCapacity} min="2" />
@@ -36,9 +45,13 @@
 				onclick={() => seating.calculate()}
 				disabled={seating.isCalculating}
 			>
-				{seating.isCalculating ? m.calculating() : m.calculate_button()}
+				<Sparkle size={18} weight="bold" />
+				<span>{seating.isCalculating ? m.calculating() : m.calculate_button()}</span>
 			</button>
-			<button class="btn-reset" onclick={() => seating.reset()}>{m.reset()}</button>
+			<button class="btn-reset" onclick={() => seating.reset()}>
+				<ArrowsCounterClockwise size={16} weight="bold" />
+				<span>{m.reset()}</span>
+			</button>
 		</div>
 	</div>
 
@@ -67,7 +80,13 @@
 				class:copied={seating.isCopied}
 				onclick={() => seating.copyToClipboard()}
 			>
-				{seating.isCopied ? m.copied() : m.copy_button()}
+				{#if seating.isCopied}
+					<Check size={16} weight="bold" />
+					<span>{m.copied()}</span>
+				{:else}
+					<Copy size={16} weight="bold" />
+					<span>{m.copy_button()}</span>
+				{/if}
 			</button>
 		</div>
 
@@ -75,9 +94,9 @@
 			{#each seating.rounds as round, rIndex}
 				<div class="round-section">
 					<div class="round-title">
-						<span class="sparkle">✨</span>
+						<span class="sparkle"><Sparkle size={18} weight="fill" /></span>
 						<h3>{m.round()} {rIndex + 1}</h3>
-						<span class="sparkle">✨</span>
+						<span class="sparkle"><Sparkle size={18} weight="fill" /></span>
 					</div>
 
 					<div class="table-gallery">
@@ -213,21 +232,28 @@
 	}
 
 	.glow-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		height: 44px;
 		background: linear-gradient(135deg, var(--accent-primary), #8b5cf6);
 		color: white;
 		border: none;
-		padding: 0.75rem 1.5rem;
-		border-radius: 50px;
-		font-weight: 900;
-		font-size: 1rem;
+		padding: 0 1.5rem;
+		border-radius: 10px;
+		font-weight: 700;
+		font-size: 0.95rem;
 		cursor: pointer;
-		box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.5);
-		transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+		box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+		transition: all 0.2s ease;
+		box-sizing: border-box;
+		white-space: nowrap;
 	}
 
 	.glow-button:hover:not(:disabled) {
-		transform: translateY(-4px) scale(1.05);
-		box-shadow: 0 15px 25px -5px rgba(37, 99, 235, 0.6);
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
 	}
 
 	.glow-button:disabled {
@@ -236,19 +262,28 @@
 	}
 
 	.btn-reset {
-		background: transparent;
-		border: 2px solid var(--border-color);
-		color: var(--text-secondary);
-		padding: 0.5rem 1.25rem;
-		border-radius: 50px;
-		font-weight: 700;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.45rem;
+		height: 44px;
+		background: var(--bg-card);
+		border: 1px solid var(--border-color);
+		color: var(--text-primary);
+		padding: 0 1.25rem;
+		border-radius: 10px;
+		font-weight: 600;
+		font-size: 0.9rem;
 		cursor: pointer;
-		transition: all 0.2s;
+		transition: all 0.2s ease;
+		box-sizing: border-box;
+		white-space: nowrap;
 	}
 
 	.btn-reset:hover {
 		border-color: var(--accent-primary);
 		color: var(--accent-primary);
+		transform: translateY(-2px);
 	}
 
 	.alert.error {
@@ -293,18 +328,30 @@
 	}
 
 	.btn-copy-visual {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.45rem;
+		height: 38px;
 		background: var(--accent-primary);
-		color: white;
-		padding: 0.75rem 1.5rem;
-		border-radius: 15px;
-		font-weight: 800;
-		transition: all 0.3s;
+		color: #ffffff;
+		padding: 0 1.25rem;
+		border-radius: 8px;
+		font-weight: 600;
+		font-size: 0.85rem;
+		transition: all 0.2s ease;
 		border: none;
 		cursor: pointer;
+		white-space: nowrap;
+	}
+
+	.btn-copy-visual:hover {
+		background: var(--accent-hover);
+		transform: translateY(-1px);
 	}
 
 	.btn-copy-visual.copied {
-		background: #10b981;
+		background: #16a34a;
 	}
 
 	.round-section {

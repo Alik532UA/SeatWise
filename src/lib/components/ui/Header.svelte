@@ -4,7 +4,7 @@
 	import type { UIController, UISkin } from '$lib/controllers/UIController.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { setLocale, getLocale, locales } from '$lib/paraglide/runtime';
-	import { Sparkles, ExternalLink } from '@lucide/svelte';
+	import { Sparkle, ArrowSquareOut, Sun, Moon, SlidersHorizontal } from 'phosphor-svelte';
 
 	const theme = getContext<ThemeController>('theme');
 	const ui = getContext<UIController>('ui');
@@ -29,17 +29,19 @@
 			data-testid="order-cta-btn"
 			title={m.order_cta()}
 		>
-			<Sparkles size={16} aria-hidden="true" />
+			<Sparkle size={16} weight="bold" />
 			<span>{m.order_cta()}</span>
-			<ExternalLink size={14} aria-hidden="true" />
+			<ArrowSquareOut size={14} weight="bold" />
 		</a>
 
-		<div class="control-group">
-			<label for="skin-select">{m.ui_variant?.() || 'Варіант UI'}:</label>
+		<div class="skin-select-box">
+			<SlidersHorizontal size={15} class="control-icon" weight="bold" />
+			<label for="skin-select" class="sr-only">{m.ui_variant?.() || 'Варіант UI'}</label>
 			<select
 				id="skin-select"
 				value={ui.skin}
 				onchange={(e) => ui.setSkin(e.currentTarget.value as UISkin)}
+				aria-label={m.ui_variant?.() || 'Варіант UI'}
 			>
 				<option value="professional">Professional</option>
 				<option value="compact">Compact</option>
@@ -47,22 +49,28 @@
 			</select>
 		</div>
 
-		<div class="control-group">
-			<button class="theme-toggle" onclick={() => theme.toggle()} title="Toggle Theme">
-				{#if theme.theme === 'light'}
-					🌙
-				{:else}
-					☀️
-				{/if}
-			</button>
-		</div>
+		<button
+			type="button"
+			class="theme-toggle touch-target"
+			onclick={() => theme.toggle()}
+			title="Toggle Theme"
+			aria-label="Toggle Theme"
+		>
+			{#if theme.theme === 'light'}
+				<Moon size={18} weight="bold" />
+			{:else}
+				<Sun size={18} weight="bold" />
+			{/if}
+		</button>
 
-		<div class="control-group lang-switcher">
+		<div class="lang-switcher" role="group" aria-label="Language selection">
 			{#each locales as l}
 				<button
+					type="button"
 					class="lang-btn"
 					class:active={getLocale() === l}
 					onclick={() => handleLocaleChange(l)}
+					aria-pressed={getLocale() === l}
 				>
 					{l.toUpperCase()}
 				</button>
@@ -76,98 +84,65 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 1rem 2rem;
+		padding: 0.85rem 2rem;
 		background-color: var(--bg-secondary);
 		border-bottom: 1px solid var(--border-color);
 		flex-wrap: wrap;
 		gap: 1rem;
+		transition:
+			background-color 0.2s,
+			border-color 0.2s;
 	}
 
 	.logo h1 {
 		margin: 0;
-		font-size: 1.5rem;
+		font-size: 1.35rem;
+		font-weight: 700;
 		color: var(--text-primary);
+		letter-spacing: -0.02em;
 	}
 
 	.subtitle {
-		margin: 0;
-		font-size: 0.85rem;
+		margin: 0.2rem 0 0;
+		font-size: 0.82rem;
 		color: var(--text-secondary);
 	}
 
 	.controls {
 		display: flex;
 		align-items: center;
-		gap: 1.5rem;
+		gap: 0.6rem;
 		flex-wrap: wrap;
 	}
 
-	.control-group {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
-	.control-group label {
-		font-size: 0.85rem;
-		color: var(--text-secondary);
-	}
-
-	select {
-		padding: 0.4rem;
-		border-radius: 4px;
-		border: 1px solid var(--border-color);
-		background-color: var(--bg-primary);
-		color: var(--text-primary);
-	}
-
-	.theme-toggle {
-		background: none;
-		border: 1px solid var(--border-color);
-		border-radius: 4px;
-		padding: 0.4rem;
-		cursor: pointer;
-		font-size: 1.2rem;
-		line-height: 1;
-		background-color: var(--bg-primary);
-	}
-
-	.lang-switcher {
-		display: flex;
-		gap: 0.25rem;
-	}
-
-	.lang-btn {
-		background: none;
-		border: 1px solid var(--border-color);
-		padding: 0.2rem 0.5rem;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 0.8rem;
-		color: var(--text-secondary);
-		background-color: var(--bg-primary);
-	}
-
-	.lang-btn.active {
-		background-color: var(--accent-primary);
-		color: white;
-		border-color: var(--accent-primary);
-	}
-
+	/* 1. Order CTA Button */
 	.order-cta-btn {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.4rem 0.85rem;
-		min-height: 40px;
+		gap: 0.45rem;
+		height: 38px;
+		padding: 0 0.95rem;
 		box-sizing: border-box;
-		background: linear-gradient(135deg, var(--accent-primary) 0%, #7c3aed 100%);
+		background: linear-gradient(135deg, var(--accent-primary) 0%, #6366f1 100%);
 		color: #ffffff !important;
 		font-weight: 600;
-		font-size: 0.85rem;
-		border-radius: 6px;
+		font-size: 0.82rem;
+		border-radius: 8px;
 		text-decoration: none;
-		box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);
 		transition:
 			transform 0.15s ease,
 			box-shadow 0.15s ease,
@@ -186,9 +161,122 @@
 		transform: translateY(0);
 	}
 
-	@media (max-width: 640px) {
+	/* 2. Skin Selector */
+	.skin-select-box {
+		display: inline-flex;
+		align-items: center;
+		height: 38px;
+		box-sizing: border-box;
+		padding: 0 0.5rem 0 0.65rem;
+		background-color: var(--bg-card);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		gap: 0.4rem;
+		color: var(--text-secondary);
+		transition:
+			border-color 0.15s ease,
+			background-color 0.2s;
+	}
+
+	.skin-select-box:focus-within {
+		border-color: var(--accent-primary);
+	}
+
+	select {
+		height: 100%;
+		border: none;
+		background: transparent;
+		color: var(--text-primary);
+		font-size: 0.82rem;
+		font-weight: 500;
+		cursor: pointer;
+		outline: none;
+		padding: 0 0.25rem;
+	}
+
+	select option {
+		background-color: var(--bg-card);
+		color: var(--text-primary);
+	}
+
+	/* 3. Theme Toggle */
+	.theme-toggle {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 38px;
+		height: 38px;
+		box-sizing: border-box;
+		background-color: var(--bg-card);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		cursor: pointer;
+		color: var(--text-primary);
+		transition:
+			border-color 0.15s ease,
+			background-color 0.2s,
+			transform 0.15s ease;
+	}
+
+	.theme-toggle:hover {
+		border-color: var(--accent-primary);
+		color: var(--accent-primary);
+		transform: translateY(-1px);
+	}
+
+	.theme-toggle:active {
+		transform: translateY(0);
+	}
+
+	/* 4. Language Switcher */
+	.lang-switcher {
+		display: inline-flex;
+		align-items: center;
+		height: 38px;
+		box-sizing: border-box;
+		padding: 3px;
+		gap: 2px;
+		background-color: var(--bg-card);
+		border: 1px solid var(--border-color);
+		border-radius: 8px;
+		transition:
+			border-color 0.15s ease,
+			background-color 0.2s;
+	}
+
+	.lang-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		height: 30px;
+		padding: 0 0.65rem;
+		border: none;
+		border-radius: 6px;
+		background: transparent;
+		cursor: pointer;
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: var(--text-secondary);
+		transition: all 0.15s ease;
+	}
+
+	.lang-btn:hover:not(.active) {
+		color: var(--text-primary);
+		background-color: var(--bg-secondary);
+	}
+
+	.lang-btn.active {
+		background-color: var(--accent-primary);
+		color: #ffffff;
+	}
+
+	@media (max-width: 768px) {
+		.main-header {
+			padding: 0.75rem 1rem;
+		}
+
 		.order-cta-btn span {
-			font-size: 0.8rem;
+			font-size: 0.78rem;
 		}
 	}
 </style>

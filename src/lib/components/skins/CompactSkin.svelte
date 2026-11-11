@@ -2,6 +2,7 @@
 	import { getContext } from 'svelte';
 	import type { SeatingController } from '$lib/controllers/SeatingController.svelte';
 	import * as m from '$lib/paraglide/messages';
+	import { Sparkle, ArrowsCounterClockwise } from 'phosphor-svelte';
 
 	const seating = getContext<SeatingController>('seating');
 </script>
@@ -9,21 +10,27 @@
 <div class="skin-compact">
 	<section class="config-bar">
 		<div class="field">
-			<span>N:</span>
-			<input type="number" bind:value={seating.totalPeople} />
+			<span class="label">N:</span>
+			<input type="number" bind:value={seating.totalPeople} min="2" />
 		</div>
 		<div class="field">
-			<span>T:</span>
-			<input type="number" bind:value={seating.tableCount} />
+			<span class="label">T:</span>
+			<input type="number" bind:value={seating.tableCount} min="1" />
 		</div>
 		<div class="field">
-			<span>C:</span>
-			<input type="number" bind:value={seating.tableCapacity} />
+			<span class="label">C:</span>
+			<input type="number" bind:value={seating.tableCapacity} min="2" />
 		</div>
-		<button class="primary" onclick={() => seating.calculate()}>
-			{seating.isCalculating ? m.calculating() : m.calculate_button()}
-		</button>
-		<button class="secondary" onclick={() => seating.reset()}>{m.reset()}</button>
+		<div class="actions">
+			<button class="primary" onclick={() => seating.calculate()} disabled={seating.isCalculating}>
+				<Sparkle size={15} weight="bold" />
+				<span>{seating.isCalculating ? m.calculating() : m.calculate_button()}</span>
+			</button>
+			<button class="secondary" onclick={() => seating.reset()}>
+				<ArrowsCounterClockwise size={15} weight="bold" />
+				<span>{m.reset()}</span>
+			</button>
+		</div>
 	</section>
 
 	{#if seating.rounds.length > 0}
@@ -53,80 +60,141 @@
 
 	.config-bar {
 		display: flex;
-		gap: 1rem;
-		padding: 0.5rem;
-		background: var(--bg-secondary);
+		flex-wrap: wrap;
+		gap: 0.85rem;
+		padding: 0.75rem 1rem;
+		background: var(--bg-card);
 		border: 1px solid var(--border-color);
-		margin-bottom: 1rem;
+		border-radius: 8px;
+		margin-bottom: 1.25rem;
 		align-items: center;
 	}
 
 	.field {
 		display: flex;
-		gap: 0.25rem;
+		gap: 0.35rem;
 		align-items: center;
 	}
 
+	.field .label {
+		font-weight: 700;
+		color: var(--text-secondary);
+	}
+
 	input {
-		width: 50px;
+		width: 60px;
+		height: 34px;
+		box-sizing: border-box;
 		background: var(--bg-primary);
 		color: var(--text-primary);
 		border: 1px solid var(--border-color);
-		padding: 0.1rem;
+		border-radius: 6px;
+		padding: 0 0.5rem;
+		font-family: inherit;
+		font-size: 0.85rem;
+		outline: none;
+	}
+
+	input:focus {
+		border-color: var(--accent-primary);
+	}
+
+	.actions {
+		display: flex;
+		gap: 0.5rem;
+		margin-left: auto;
 	}
 
 	button {
-		padding: 0.2rem 0.5rem;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		height: 34px;
+		padding: 0 0.85rem;
+		box-sizing: border-box;
 		cursor: pointer;
+		font-family: inherit;
+		font-size: 0.82rem;
+		font-weight: 600;
+		border-radius: 6px;
+		transition: all 0.15s ease;
+		white-space: nowrap;
+	}
+
+	button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 
 	.primary {
 		background: var(--accent-primary);
-		color: white;
+		color: #ffffff;
 		border: none;
+	}
+
+	.primary:hover:not(:disabled) {
+		background: var(--accent-hover);
+		transform: translateY(-1px);
+	}
+
+	.secondary {
+		background: var(--bg-primary);
+		color: var(--text-primary);
+		border: 1px solid var(--border-color);
+	}
+
+	.secondary:hover:not(:disabled) {
+		border-color: var(--accent-primary);
+		color: var(--accent-primary);
+		transform: translateY(-1px);
+	}
+
+	.primary:active,
+	.secondary:active {
+		transform: translateY(0);
 	}
 
 	.compact-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-		gap: 0.5rem;
+		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+		gap: 0.75rem;
 	}
 
 	.mini-round {
 		border: 1px solid var(--border-color);
+		border-radius: 6px;
 		background: var(--bg-card);
+		overflow: hidden;
 	}
 
 	.mini-round .header {
 		background: var(--bg-secondary);
-		padding: 0.25rem;
+		padding: 0.35rem 0.5rem;
 		font-weight: bold;
-		text-align: center;
 		border-bottom: 1px solid var(--border-color);
+		color: var(--accent-primary);
 	}
 
 	.tables {
-		padding: 0.25rem;
+		padding: 0.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
 	}
 
 	.mini-table {
 		display: flex;
 		gap: 0.5rem;
-		border-bottom: 1px dashed var(--border-color);
-		padding: 0.1rem 0;
-	}
-
-	.mini-table:last-child {
-		border-bottom: none;
 	}
 
 	.t-id {
+		color: var(--text-secondary);
 		font-weight: bold;
-		color: var(--accent-primary);
-		min-width: 25px;
+		width: 30px;
 	}
 
 	.t-p {
 		color: var(--text-primary);
+		word-break: break-all;
 	}
 </style>
