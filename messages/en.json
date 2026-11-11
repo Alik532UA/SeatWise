@@ -2,6 +2,7 @@
 	"$schema": "https://inlang.com/schema/project-settings",
 	"app_title": "SeatWise - Seating Optimizer",
 	"app_subtitle": "Algorithm automatically calculates the maximum possible number of rounds without repeat meetings.",
+	"order_cta": "Order website / app / game",
 	"ui_variant": "UI Variant",
 	"total_people": "Total People (N)",
 	"table_count": "Table Count (T)",

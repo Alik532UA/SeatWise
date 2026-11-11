@@ -56,4 +56,22 @@ test.describe('SeatWise E2E Tests (ACCESSIBILITY-v10 & UI-UX-v10)', () => {
 		await page.waitForTimeout(100);
 		await expect(page.locator('.skin-professional')).toBeVisible();
 	});
+
+	test('displays order website / app / game button linking to DigitalWorkshop', async ({
+		page
+	}) => {
+		await page.goto(`${BASE}/`);
+
+		const orderBtn = page.locator('[data-testid="order-cta-btn"]');
+		await expect(orderBtn).toBeVisible();
+		await expect(orderBtn).toHaveAttribute('href', 'https://alik532ua.github.io/DigitalWorkshop/');
+		await expect(orderBtn).toHaveAttribute('target', '_blank');
+
+		const footerOrderBtn = page.locator('[data-testid="footer-order-cta-btn"]');
+		await expect(footerOrderBtn).toBeVisible();
+		await expect(footerOrderBtn).toHaveAttribute(
+			'href',
+			'https://alik532ua.github.io/DigitalWorkshop/'
+		);
+	});
 });

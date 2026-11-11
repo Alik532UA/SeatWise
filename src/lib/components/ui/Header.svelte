@@ -4,6 +4,7 @@
 	import type { UIController, UISkin } from '$lib/controllers/UIController.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { setLocale, getLocale, locales } from '$lib/paraglide/runtime';
+	import { Sparkles, ExternalLink } from '@lucide/svelte';
 
 	const theme = getContext<ThemeController>('theme');
 	const ui = getContext<UIController>('ui');
@@ -20,6 +21,19 @@
 	</div>
 
 	<div class="controls">
+		<a
+			href="https://alik532ua.github.io/DigitalWorkshop/"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="order-cta-btn touch-target"
+			data-testid="order-cta-btn"
+			title={m.order_cta()}
+		>
+			<Sparkles size={16} aria-hidden="true" />
+			<span>{m.order_cta()}</span>
+			<ExternalLink size={14} aria-hidden="true" />
+		</a>
+
 		<div class="control-group">
 			<label for="skin-select">{m.ui_variant?.() || 'Варіант UI'}:</label>
 			<select
@@ -138,5 +152,43 @@
 		background-color: var(--accent-primary);
 		color: white;
 		border-color: var(--accent-primary);
+	}
+
+	.order-cta-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.4rem 0.85rem;
+		min-height: 40px;
+		box-sizing: border-box;
+		background: linear-gradient(135deg, var(--accent-primary) 0%, #7c3aed 100%);
+		color: #ffffff !important;
+		font-weight: 600;
+		font-size: 0.85rem;
+		border-radius: 6px;
+		text-decoration: none;
+		box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.15s ease,
+			opacity 0.15s ease;
+		white-space: nowrap;
+	}
+
+	.order-cta-btn:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+		color: #ffffff !important;
+		opacity: 0.95;
+	}
+
+	.order-cta-btn:active {
+		transform: translateY(0);
+	}
+
+	@media (max-width: 640px) {
+		.order-cta-btn span {
+			font-size: 0.8rem;
+		}
 	}
 </style>

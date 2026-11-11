@@ -2,6 +2,7 @@
 	"$schema": "https://inlang.com/schema/project-settings",
 	"app_title": "SeatWise — Система оптимізації розсадки",
 	"app_subtitle": "Алгоритм автоматично вираховує максимально можливу кількість раундів без повторних зустрічей.",
+	"order_cta": "Замовити сайт / застосунок / гру",
 	"ui_variant": "Варіант UI",
 	"total_people": "Всього людей (N)",
 	"table_count": "Кількість столів (T)",
