@@ -1,0 +1,30 @@
+<!doctype html>
+
+<html lang="%paraglide.lang%" dir="%paraglide.dir%">
+	<head>
+		<meta charset="utf-8" />
+
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1"
+		/>
+
+		<meta name="text-scale" content="scale" />
+		%sveltekit.head%
+	</head>
+
+	<body data-sveltekit-preload-data="hover">
+		<script>
+			(function() {
+				const PREFIX = 'seatwise_';
+				const saved = localStorage.getItem(PREFIX + 'theme');
+				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				const theme = saved || (prefersDark ? 'dark' : 'light');
+				document.documentElement.setAttribute('data-theme', theme);
+				const meta = document.querySelector('meta[name="color-scheme"]');
+				if (meta) meta.setAttribute('content', theme === 'dark' ? 'dark' : 'light dark');
+			})();
+		</script>
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

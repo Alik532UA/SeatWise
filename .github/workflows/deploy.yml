@@ -1,0 +1,87 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit dependencies
+        run: npm run audit:ci
+
+      - name: Check types & code
+        if: ${{ !cancelled() }}
+        run: npm run check
+
+      - name: Lint formatting and code
+        if: ${{ !cancelled() }}
+        run: npm run lint
+
+      - name: Run unit tests
+        if: ${{ !cancelled() }}
+        run: npm run test:unit
+
+      - name: Install Playwright browsers
+        if: ${{ !cancelled() }}
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright E2E tests
+        if: ${{ !cancelled() }}
+        run: npm run test:e2e
+
+      - name: Build site
+        id: build
+        if: ${{ !cancelled() }}
+        run: npm run build
+        env:
+          BASE_PATH: /SeatWise
+
+      - name: Check build artifacts
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: npm run check:build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: build
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+

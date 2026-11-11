@@ -1,0 +1,21 @@
+{
+	"$schema": "https://inlang.com/schema/project-settings",
+	"app_title": "SeatWise - Seating Optimizer",
+	"app_subtitle": "Algorithm automatically calculates the maximum possible number of rounds without repeat meetings.",
+	"ui_variant": "UI Variant",
+	"total_people": "Total People (N)",
+	"table_count": "Table Count (T)",
+	"table_capacity": "Table Capacity (C)",
+	"calculate_button": "Generate Seating",
+	"calculating": "Calculating...",
+	"round": "Round",
+	"table": "Table",
+	"reset": "Reset",
+	"perfect_goal": "🎯 Goal achieved: every participant will sit at the same table with each of the {count} other guests. Repeat meetings are minimized.",
+	"rounds_needed": "Rounds needed for full networking",
+	"error_max_capacity": "Error: Tables cannot accommodate this many people. Max: {max}.",
+	"copy_button": "Copy Result",
+	"copied": "Copied!",
+	"participants_list": "Participants Names (one per line)",
+	"participants_placeholder": "Enter names or leave empty for numbers..."
+}
