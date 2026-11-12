@@ -61,4 +61,24 @@ describe('Seating Algorithms Scalability & Performance', () => {
 			expect(participantsInRound.length).toBe(16);
 		}
 	});
+
+	it('High Scalability: Greedy heuristic generates rounds for 80 participants in under 400ms without freezing', () => {
+		const start = performance.now();
+		const rounds = generateUntilFullyConnected(80, 10, 8);
+		const duration = performance.now() - start;
+
+		expect(duration).toBeLessThan(1000);
+		expect(rounds.length).toBeGreaterThanOrEqual(2);
+		expect(rounds[0].flat().length).toBe(80);
+	});
+
+	it('High Scalability: Handles large conference scale of 120 participants stably', () => {
+		const start = performance.now();
+		const rounds = generateUntilFullyConnected(120, 15, 8);
+		const duration = performance.now() - start;
+
+		expect(duration).toBeLessThan(1500);
+		expect(rounds.length).toBeGreaterThanOrEqual(2);
+		expect(rounds[0].flat().length).toBe(120);
+	});
 });

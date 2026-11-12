@@ -81,23 +81,33 @@ export function generateUntilFullyConnected(N: number, T: number, C: number): Se
 	const totalPairsNeeded = (N * (N - 1)) / 2;
 	const MAX_ROUNDS_SAFETY = 40;
 
-	// ОПТИМІЗАЦІЯ ШВИДКОСТІ: Якщо людей багато, зменшуємо кількість глобальних спроб,
-	// оскільки локальний пошук Hill Climbing і так чудово оптимізує граф за один прохід.
-	const ATTEMPTS = N > 50 ? 5 : 200;
+	// ОПТИМІЗАЦІЯ ШВИДКОСТІ ТА МАСШТАБОВАНОСТІ:
+	// Адаптивна кількість спроб та ітерацій локального пошуку залежно від розміру графа.
+	const ATTEMPTS = N > 60 ? 3 : N > 30 ? 15 : 100;
+	const MAX_SWAP_ITERS = N > 60 ? 15 : 40;
+	const stride = N + 1;
 
 	for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
-		const pairs = Array.from({ length: N + 1 }, () => Array(N + 1).fill(false));
+		// Оптимізована пласка матриця пар через Uint8Array для мінімізації навантаження на GC
+		const pairs = new Uint8Array(stride * stride);
 		let coveredPairs = 0;
 		const currentRounds: SeatingPlan = [];
 
 		while (coveredPairs < totalPairsNeeded && currentRounds.length < MAX_ROUNDS_SAFETY) {
 			const tables: number[][] = Array.from({ length: T }, () => []);
-			const available = Array.from({ length: N }, (_, i) => i + 1);
+			const available: number[] = new Array(N);
+			for (let i = 0; i < N; i++) available[i] = i + 1;
 
-			available.sort(() => Math.random() - 0.5);
+			// Fisher-Yates швидке перемішування
+			for (let i = N - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				const tmp = available[i];
+				available[i] = available[j];
+				available[j] = tmp;
+			}
 
 			const activeTablesCount = Math.ceil(N / C);
-			const tableCapacities = Array(T).fill(0);
+			const tableCapacities = new Array(T).fill(0);
 			let remainingPeople = N;
 
 			for (let t = 0; t < activeTablesCount; t++) {
@@ -107,25 +117,29 @@ export function generateUntilFullyConnected(N: number, T: number, C: number): Se
 			}
 
 			// Крок 1: Жадібна чорнова розсадка
+			let availLen = available.length;
 			for (let t = 0; t < T; t++) {
-				while (tables[t].length < tableCapacities[t] && available.length > 0) {
+				const targetCap = tableCapacities[t];
+				while (tables[t].length < targetCap && availLen > 0) {
 					let bestCandidateIdx = -1;
 					let maxScore = -1;
 
-					for (let i = 0; i < available.length; i++) {
+					// Для великих N обмежуємо кількість перевірених кандидатів для O(N) замість O(N^2)
+					const scanLimit = availLen > 40 ? 30 : availLen;
+					for (let i = 0; i < scanLimit; i++) {
 						const candidate = available[i];
+						const cOffset = candidate * stride;
 						let unmetAtTable = 0;
-						for (const member of tables[t]) {
-							if (!pairs[candidate][member]) unmetAtTable++;
+						for (let m = 0; m < tables[t].length; m++) {
+							if (pairs[cOffset + tables[t][m]] === 0) unmetAtTable++;
 						}
 
 						let totalUnmetGlobal = 0;
 						for (let p = 1; p <= N; p++) {
-							if (p !== candidate && !pairs[candidate][p]) totalUnmetGlobal++;
+							if (p !== candidate && pairs[cOffset + p] === 0) totalUnmetGlobal++;
 						}
 
-						let currentScore = unmetAtTable * 1000 + totalUnmetGlobal;
-						currentScore += Math.random() * 0.1;
+						const currentScore = unmetAtTable * 1000 + totalUnmetGlobal + Math.random() * 0.1;
 
 						if (currentScore > maxScore) {
 							maxScore = currentScore;
@@ -135,7 +149,11 @@ export function generateUntilFullyConnected(N: number, T: number, C: number): Se
 
 					if (bestCandidateIdx !== -1) {
 						tables[t].push(available[bestCandidateIdx]);
-						available.splice(bestCandidateIdx, 1);
+						// Швидке видалення O(1) перестановкою з кінцем масиву
+						available[bestCandidateIdx] = available[availLen - 1];
+						availLen--;
+					} else {
+						break;
 					}
 				}
 			}
@@ -144,28 +162,43 @@ export function generateUntilFullyConnected(N: number, T: number, C: number): Se
 			let improved = true;
 			let swapIterations = 0;
 
-			// Запобіжник swapIterations < 50 не дає алгоритму зациклюватися на великих N
-			while (improved && swapIterations < 50) {
+			while (improved && swapIterations < MAX_SWAP_ITERS) {
 				improved = false;
 				swapIterations++;
 				for (let t1 = 0; t1 < T; t1++) {
 					for (let t2 = t1 + 1; t2 < T; t2++) {
-						for (let i = 0; i < tables[t1].length; i++) {
-							for (let j = 0; j < tables[t2].length; j++) {
-								const p1 = tables[t1][i];
-								const p2 = tables[t2][j];
+						const tbl1 = tables[t1];
+						const tbl2 = tables[t2];
+						for (let i = 0; i < tbl1.length; i++) {
+							for (let j = 0; j < tbl2.length; j++) {
+								const p1 = tbl1[i];
+								const p2 = tbl2[j];
+								const p1Offset = p1 * stride;
+								const p2Offset = p2 * stride;
 
 								let currentNewPairs = 0;
-								for (const m of tables[t1]) if (m !== p1 && !pairs[p1][m]) currentNewPairs++;
-								for (const m of tables[t2]) if (m !== p2 && !pairs[p2][m]) currentNewPairs++;
+								for (let m = 0; m < tbl1.length; m++) {
+									const mem = tbl1[m];
+									if (mem !== p1 && pairs[p1Offset + mem] === 0) currentNewPairs++;
+								}
+								for (let m = 0; m < tbl2.length; m++) {
+									const mem = tbl2[m];
+									if (mem !== p2 && pairs[p2Offset + mem] === 0) currentNewPairs++;
+								}
 
 								let swappedNewPairs = 0;
-								for (const m of tables[t1]) if (m !== p1 && !pairs[p2][m]) swappedNewPairs++;
-								for (const m of tables[t2]) if (m !== p2 && !pairs[p1][m]) swappedNewPairs++;
+								for (let m = 0; m < tbl1.length; m++) {
+									const mem = tbl1[m];
+									if (mem !== p1 && pairs[p2Offset + mem] === 0) swappedNewPairs++;
+								}
+								for (let m = 0; m < tbl2.length; m++) {
+									const mem = tbl2[m];
+									if (mem !== p2 && pairs[p1Offset + mem] === 0) swappedNewPairs++;
+								}
 
 								if (swappedNewPairs > currentNewPairs) {
-									tables[t1][i] = p2;
-									tables[t2][j] = p1;
+									tbl1[i] = p2;
+									tbl2[j] = p1;
 									improved = true;
 								}
 							}
@@ -175,24 +208,38 @@ export function generateUntilFullyConnected(N: number, T: number, C: number): Se
 			}
 
 			// Крок 3: Фіксація зв'язків
+			let roundNewPairs = 0;
 			for (let t = 0; t < T; t++) {
-				for (let i = 0; i < tables[t].length; i++) {
-					for (let j = i + 1; j < tables[t].length; j++) {
-						const p1 = tables[t][i];
-						const p2 = tables[t][j];
-						if (!pairs[p1][p2]) {
-							pairs[p1][p2] = true;
-							pairs[p2][p1] = true;
+				const tbl = tables[t];
+				for (let i = 0; i < tbl.length; i++) {
+					const p1 = tbl[i];
+					const p1Offset = p1 * stride;
+					for (let j = i + 1; j < tbl.length; j++) {
+						const p2 = tbl[j];
+						if (pairs[p1Offset + p2] === 0) {
+							pairs[p1Offset + p2] = 1;
+							pairs[p2 * stride + p1] = 1;
 							coveredPairs++;
+							roundNewPairs++;
 						}
 					}
 				}
 			}
 			currentRounds.push(tables);
+
+			// Якщо цей раунд не приніс жодного нового знайомства, зупиняємо нарощування
+			if (roundNewPairs === 0) {
+				break;
+			}
 		}
 
 		if (bestRounds.length === 0 || currentRounds.length < bestRounds.length) {
 			bestRounds = currentRounds;
+		}
+
+		// Якщо досягнуто 100% покриття графа, подальші спроби не потрібні
+		if (coveredPairs >= totalPairsNeeded) {
+			break;
 		}
 	}
 
