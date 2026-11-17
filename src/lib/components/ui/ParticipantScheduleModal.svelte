@@ -487,7 +487,7 @@
 	/* Tables Grid View */
 	.rounds-grid-tables {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(min(215px, 100%), 1fr));
 		gap: 0.85rem;
 		justify-content: center;
 	}

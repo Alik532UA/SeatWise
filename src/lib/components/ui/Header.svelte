@@ -157,7 +157,7 @@
 
 	.logo h1 {
 		margin: 0;
-		font-size: clamp(1.05rem, 1.35vw, 1.25rem);
+		font-size: clamp(1.05rem, 0.95rem + 0.4vw, 1.25rem);
 		font-weight: 700;
 		color: var(--text-primary);
 		line-height: 1.2;

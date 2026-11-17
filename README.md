@@ -1,10 +1,10 @@
-# SeatWise 🎯
+﻿# SeatWise 🎯
 
 > **Інтелектуальна система оптимізації розсадки учасників на бізнес-івентах та нетворкінг-сесіях.**
 
 [![Svelte 5](https://img.shields.io/badge/Svelte-5_Runes-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Canon v10](https://img.shields.io/badge/sveltekit--canon-v10-success)](../sveltekit-canon/)
+[![Canon v10](https://img.shields.io/badge/sveltekit--canon-v10-success)](../../sveltekit-canon/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
