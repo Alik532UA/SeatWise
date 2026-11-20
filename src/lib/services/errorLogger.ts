@@ -177,6 +177,10 @@ class ErrorLogger {
 		} catch {}
 		this.notify();
 	}
+
+	clearCache(): void {
+		this.clear();
+	}
 }
 
 export const errorLogger = new ErrorLogger();
