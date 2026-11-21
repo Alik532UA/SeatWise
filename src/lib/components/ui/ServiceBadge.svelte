@@ -55,7 +55,7 @@
 		else if (action === 'clear') errorLogger.clear();
 		else if (action === 'hide') {
 			userDismissed = true;
-			if (debugMode.enabled) debugMode.set(false);
+			if (debugMode.enabled) debugMode.toggle();
 		}
 	}
 
@@ -142,7 +142,10 @@
 			class="badge"
 			class:badge--has-errors={errorCount > 0}
 			class:badge--copied={copied}
-			onclick={() => (menuOpen = !menuOpen)}
+			onclick={async () => {
+				await copyReport();
+				menuOpen = !menuOpen;
+			}}
 			oncontextmenu={(e) => {
 				e.preventDefault();
 				menuOpen = true;

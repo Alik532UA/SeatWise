@@ -51,7 +51,11 @@
 			if (copyTimer) clearTimeout(copyTimer);
 			copyTimer = setTimeout(() => (copied = false), 1500);
 		} catch (error) {
-			errorLogger.logWarning('не вдалося скопіювати звіт з модалки', { component: 'ErrorLogModal' }, error);
+			errorLogger.logWarning(
+				'не вдалося скопіювати звіт з модалки',
+				{ component: 'ErrorLogModal' },
+				error
+			);
 		}
 	}
 
@@ -70,7 +74,11 @@
 	function formatTime(iso: string): string {
 		try {
 			const d = new Date(iso);
-			return d.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+			return d.toLocaleTimeString('uk-UA', {
+				hour: '2-digit',
+				minute: '2-digit',
+				second: '2-digit'
+			});
 		} catch {
 			return iso;
 		}
@@ -211,7 +219,9 @@
 												<WarningCircle size={11} weight="bold" /> ERROR
 											</span>
 											{#if item.severity}
-												<span class="severity-pill severity-pill--{item.severity}">{item.severity}</span>
+												<span class="severity-pill severity-pill--{item.severity}"
+													>{item.severity}</span
+												>
 											{/if}
 										{:else if item.level === 'warn'}
 											<span class="level-pill level-pill--warn">
@@ -320,7 +330,9 @@
 		color: #f4f4f5;
 		opacity: 0.7;
 		cursor: pointer;
-		transition: opacity 0.15s ease, background 0.15s ease;
+		transition:
+			opacity 0.15s ease,
+			background 0.15s ease;
 	}
 	.btn-close:hover {
 		opacity: 1;
